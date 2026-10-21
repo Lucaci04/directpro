@@ -1,0 +1,274 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { contact, services } from '../data/site';
+import a22 from '../assets/atelier/atelier-22.jpg';
+---
+<Base title="Contact" description={`Sună la ${contact.phoneDisplay} sau vino la ${contact.street}, ${contact.building}, București. ${contact.hours}.`}>
+  <section class="section contact" aria-labelledby="contact-title">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap contact-grid">
+      <div class="contact-main">
+        <h1 id="contact-title" class="visually-hidden">Contact DIRECTPRO</h1>
+        <a class="big-phone" href={contact.phoneHref} aria-label={`Sună la recepție: ${contact.phoneDisplay}`}>{contact.phoneDisplay}</a>
+        <p class="hours"><Icon name="clock" size={18} />{contact.hours}</p>
+        <div class="actions">
+          <a class="btn btn--call" href={contact.phoneHref}><Icon name="phone" />Sună acum</a>
+          <a class="btn btn--ghost" href={contact.whatsappHref} rel="noopener" target="_blank"><Icon name="chat" />WhatsApp</a>
+          <a class="btn btn--ghost" href={`mailto:${contact.email}`}><Icon name="mail" />{contact.email}</a>
+        </div>
+
+        <div class="where">
+          <h2>Unde ne găsești</h2>
+          <address>
+            <Icon name="pin" />
+            <span>{contact.street}<br />{contact.building}<br />{contact.city}</span>
+          </address>
+          <p class="map-links">
+            <a class="btn btn--ghost" href={contact.mapsHref} rel="noopener" target="_blank">Google Maps <Icon name="external" size={16} /></a>
+            <a class="btn btn--ghost" href={contact.wazeHref} rel="noopener" target="_blank">Waze <Icon name="external" size={16} /></a>
+          </p>
+        </div>
+        <Image class="office" src={a22} alt="Biroul DIRECTPRO" widths={[480, 800]} sizes="(max-width: 860px) 100vw, 50vw" />
+      </div>
+
+      <form class="message" data-message novalidate>
+        <h2>Lasă-ne un mesaj</h2>
+        <p class="notice notice--demo">
+          <strong>Formular demonstrativ:</strong> mesajul apare doar în panoul de administrare, nu se trimite pe email.
+          Pentru un răspuns rapid, sună sau scrie pe WhatsApp.
+        </p>
+        <div class="field">
+          <label for="m-nume">Nume</label>
+          <input id="m-nume" name="nume" autocomplete="name" required />
+          <p class="error-text" data-error-for="nume" hidden>Scrie-ne numele tău.</p>
+        </div>
+        <div class="field">
+          <label for="m-tel">Telefon</label>
+          <input id="m-tel" name="telefon" type="tel" inputmode="tel" autocomplete="tel" required />
+          <p class="error-text" data-error-for="telefon" hidden>Scrie un număr de telefon valid, de exemplu 07xx xxx xxx.</p>
+        </div>
+        <div class="field">
+          <label for="m-serviciu">Despre ce e vorba?</label>
+          <select id="m-serviciu" name="serviciu">
+            <option value="">Nu știu încă</option>
+            {services.map((s) => <option>{s.name}</option>)}
+            <option>Comandă casetă din magazin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="m-msg">Mașina și problema</label>
+          <textarea id="m-msg" name="mesaj" rows="5" placeholder="ex. Golf 7, 2016: volanul e greu la stânga" required></textarea>
+          <p class="error-text" data-error-for="mesaj" hidden>Spune-ne pe scurt ce mașină ai și ce simți.</p>
+        </div>
+        <label class="consent">
+          <input type="checkbox" name="acord" />
+          <span>Sunt de acord cu prelucrarea datelor pentru a fi contactat.</span>
+        </label>
+        <p class="error-text" data-error-for="acord" hidden>Bifează acordul ca să trimiți mesajul.</p>
+        <p class="notice notice--error" data-server-error role="alert" hidden></p>
+        <button class="btn btn--call" type="submit" data-submit>Trimite mesajul (demo)</button>
+        <p class="sent" data-sent hidden tabindex="-1" role="status">
+          <Icon name="check" /> Mesaj de test înregistrat în panoul de administrare.
+        </p>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-message]')!;
+  const sent = form.querySelector<HTMLElement>('[data-sent]')!;
+  const check = (name: string, bad: boolean) => {
+    const input = form.elements.namedItem(name) as HTMLInputElement;
+    const msg = form.querySelector<HTMLElement>(`[data-error-for="${name}"]`)!;
+    msg.id = `m-err-${name}`;
+    msg.hidden = !bad;
+    input.setAttribute('aria-invalid', String(bad));
+    if (bad) input.setAttribute('aria-describedby', msg.id);
+    else input.removeAttribute('aria-describedby');
+    return bad;
+  };
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = new FormData(form);
+    const phone = String(d.get('telefon') || '').replace(/[\s.-]/g, '');
+    const bad = [
+      check('nume', String(d.get('nume') || '').trim().length < 2),
+      check('telefon', !/^(\+?40|0)\d{9}$/.test(phone)),
+      check('mesaj', String(d.get('mesaj') || '').trim().length < 5),
+      check('acord', !d.get('acord')),
+    ];
+    if (bad.some(Boolean)) {
+      form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      return;
+    }
+    const serverError = form.querySelector<HTMLElement>('[data-server-error]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    serverError.hidden = true;
+    submit.disabled = true;
+    try {
+      const res = await fetch('/api/mesaj', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...Object.fromEntries(d), acord: true }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Mesajul nu a putut fi trimis.');
+      form.reset();
+      sent.hidden = false;
+      sent.focus();
+    } catch (err) {
+      serverError.textContent = `${(err as Error).message} Încearcă din nou sau sună-ne.`;
+      serverError.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: start;
+  }
+
+  .big-phone {
+    display: inline-block;
+    color: var(--ink);
+    white-space: nowrap;
+    font-size: clamp(2.3rem, 1.2rem + 4vw, 4.5rem);
+    font-stretch: 120%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .big-phone:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--lane);
+    text-decoration-thickness: 6px;
+  }
+
+  .hours {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-weight: 650;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .where {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .where h2 {
+    font-size: var(--step-2);
+    margin-bottom: 1rem;
+  }
+
+  address {
+    display: flex;
+    gap: 0.6rem;
+    font-style: normal;
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  address :global(svg) {
+    flex: none;
+    margin-top: 0.3em;
+    color: var(--teal-ink);
+  }
+
+  .map-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .contact-main :global(.office) {
+    margin-top: 2.5rem;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  .message {
+    display: grid;
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-top: var(--lane-w) solid var(--lane);
+    position: sticky;
+    top: 6rem;
+  }
+
+  .message h2 {
+    font-size: var(--step-2);
+  }
+
+  .message .btn {
+    width: 100%;
+  }
+
+  .consent {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  .consent input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.15rem;
+    flex: none;
+  }
+
+  [data-server-error][hidden] {
+    display: none;
+  }
+
+  .sent {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    font-weight: 650;
+  }
+
+  .sent[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 860px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .message {
+      position: static;
+    }
+
+    .actions .btn {
+      flex: 1 1 100%;
+    }
+  }
+</style>

@@ -1,0 +1,467 @@
+/* Șablon 2 — „Banc de probă”: bleumarin de echipament, gri oțel, galben de indicator.
+   Galbenul marchează acțiunea și starea activă; roșul doar erori. */
+
+:root {
+  --floor: #eef1f4;
+  --floor-deep: #dde3ea;
+  --paper: #ffffff;
+  --ink: #0f1f33;
+  --ink-soft: #3a4a5e;
+  --ink-faint: #56657a;
+  --teal: #2563b8;
+  --teal-ink: #1d4f96;
+  --lane: #f5b800;
+  --lane-deep: #dba300;
+  --red: #c4372b;
+  --line: #cfd6de;
+
+  --font: 'Onest Variable', system-ui, sans-serif;
+  --navy: #0f2742;
+  --navy-2: #163659;
+  --steel: #8a97a8;
+  --step--1: clamp(0.84rem, 0.82rem + 0.1vw, 0.9rem);
+  --step-0: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --step-1: clamp(1.2rem, 1.12rem + 0.4vw, 1.4rem);
+  --step-2: clamp(1.45rem, 1.3rem + 0.75vw, 1.9rem);
+  --step-3: clamp(1.8rem, 1.5rem + 1.5vw, 2.75rem);
+  --step-4: clamp(2.3rem, 1.7rem + 3vw, 4.25rem);
+  --step-5: clamp(2.35rem, 1.5rem + 3.6vw, 4.6rem);
+
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+  --lane-x: clamp(0.5rem, 1.5vw, 1.4rem);
+  --lane-w: clamp(6px, 0.55vw, 9px);
+  --max: 1240px;
+  --radius: 10px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow: 0 1px 2px rgb(15 31 51 / 0.06), 0 8px 24px -8px rgb(15 31 51 / 0.18);
+
+  color-scheme: light;
+  accent-color: var(--teal-ink);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 6rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--floor);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--lane);
+  color: var(--ink);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--teal-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--lane);
+  border-radius: 2px;
+}
+
+/* ---------- Layout ---------- */
+
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: calc(var(--gutter) + var(--lane-x) + var(--lane-w));
+}
+
+.section {
+  padding-block: clamp(4rem, 3rem + 5vw, 8rem);
+  position: relative;
+}
+
+.section + .section {
+  border-top: 1px solid var(--line);
+}
+
+.measure {
+  max-width: 64ch;
+}
+
+.lede {
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.75rem 1rem;
+  font-weight: 650;
+}
+
+.skip:focus {
+  top: 1rem;
+}
+
+/* ---------- Signage type ---------- */
+
+.sign {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.label {
+  font-size: var(--step--1);
+  font-stretch: 100%;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  --btn-bg: var(--ink);
+  --btn-fg: var(--paper);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 48px;
+  padding: 0.75rem 1.35rem;
+  border: 2px solid var(--btn-bg);
+  border-radius: var(--radius);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font: inherit;
+  font-weight: 700;
+  font-stretch: 108%;
+  line-height: 1.1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.btn:hover {
+  --btn-bg: #081627;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+
+.btn--call {
+  --btn-bg: var(--lane);
+  --btn-fg: var(--ink);
+  font-size: var(--step-1);
+  padding: 0.85rem 1.5rem;
+}
+
+.btn--call:hover {
+  --btn-bg: var(--lane-deep);
+}
+
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--ink);
+  border-color: var(--ink);
+}
+
+.btn--ghost:hover {
+  --btn-bg: var(--ink);
+  --btn-fg: var(--paper);
+}
+
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Floor lane (signature) ----------
+   O linie galbenă de marcaj, ca pe podeaua atelierului, care coboară pe toată pagina.
+   Se desenează odată cu scroll-ul (JS setează --lane-progress); fără JS sau cu
+   reduced motion, e afișată complet. */
+
+.lane-track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--gutter) * 0.5 + var(--lane-x));
+  width: var(--lane-w);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lane-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--floor-deep);
+}
+
+.lane-paint {
+  position: absolute;
+  inset: 0;
+  background: var(--lane);
+  transform-origin: top;
+  transform: scaleY(var(--lane-progress, 1));
+  will-change: transform;
+}
+
+/* Opriri pe linie: marcajul se aprinde când secțiunea e în vizor. */
+.stop {
+  position: absolute;
+  left: calc(var(--gutter) * 0.5 + var(--lane-x) - 7px);
+  width: calc(var(--lane-w) + 14px);
+  height: calc(var(--lane-w) + 14px);
+  border: 3px solid var(--lane);
+  background: var(--floor);
+  z-index: 2;
+  transition:
+    background-color 400ms var(--ease-out),
+    border-color 400ms var(--ease-out);
+}
+
+.stop.is-lit {
+  background: var(--lane);
+  border-color: var(--ink);
+}
+
+@media (max-width: 860px) {
+  .stop {
+    display: none;
+  }
+}
+
+/* Șablonul 2 nu folosește linia de pe podea; drumul e indicat de volan. */
+.lane-track,
+.stop {
+  display: none !important;
+}
+
+/* ---------- Painted bay corners ---------- */
+
+.bay-frame {
+  --c: var(--line);
+  border: 1px solid var(--c);
+  border-radius: var(--radius);
+  background-color: var(--paper);
+}
+
+/* ---------- Reveal: blocurile urcă ușor și apar, o singură dată ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .js .paint-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 900ms var(--ease-out);
+  }
+
+  .js .paint-in.is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Forms ---------- */
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-weight: 650;
+}
+
+.field .hint {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+input[type='file']::file-selector-button {
+  min-height: 44px;
+  margin-right: 0.9rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+input[type='file']::file-selector-button:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+input:not([type='checkbox']):not([type='radio']):not([type='file']),
+select,
+textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 0.85rem;
+  border: 2px solid #8a97a8;
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: max(16px, var(--step-0));
+}
+
+textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #5b6a7e;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--ink);
+}
+
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: var(--red);
+}
+
+.error-text {
+  color: var(--red);
+  font-weight: 600;
+  font-size: var(--step--1);
+}
+
+.notice {
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.notice--demo {
+  border-style: dashed;
+}
+
+.notice--error {
+  border-color: var(--red);
+  color: #7d1f17;
+}
+
+/* ---------- Prices ---------- */
+
+.price {
+  font-stretch: 112%;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.price del {
+  font-weight: 500;
+  color: var(--ink-faint);
+  margin-right: 0.4em;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--floor-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #97a3b3;
+  border: 3px solid var(--floor-deep);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-soft);
+}

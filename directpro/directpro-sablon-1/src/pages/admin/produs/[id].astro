@@ -1,0 +1,50 @@
+---
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import Admin from '../../../layouts/Admin.astro';
+import ProductForm from '../../../components/ProductForm.astro';
+import { readProductForm, valuesFrom, type FormErrors } from '../../../lib/product-form';
+import { getProduct, updateProduct, uploadsDir } from '../../../lib/products';
+
+export const prerender = false;
+
+const product = await getProduct(Astro.params.id ?? '');
+if (!product) return Astro.redirect('/admin?mesaj=lipsa', 303);
+
+let values = valuesFrom(product);
+let errors: FormErrors = {};
+
+if (Astro.request.method === 'POST') {
+  const result = await readProductForm(await Astro.request.formData(), false);
+  values = result.values;
+  errors = result.errors;
+  if (result.product) {
+    const { image, ...rest } = result.product;
+    await updateProduct(product.id, image ? { ...rest, image } : rest);
+    // O imagine încărcată anterior din admin și înlocuită acum nu mai e folosită.
+    if (image && product.image.startsWith('/uploads/')) {
+      await fs.rm(path.join(uploadsDir, path.basename(product.image)), { force: true });
+    }
+    return Astro.redirect(`/admin?mesaj=salvat&id=${encodeURIComponent(product.id)}`, 303);
+  }
+}
+---
+<Admin title={`Editează: ${product.name}`}>
+  <a class="back" href="/admin">← Înapoi la produse</a>
+  <h1>Editează produsul</h1>
+  <ProductForm values={values} errors={errors} image={product.image} submitLabel="Salvează modificările" />
+</Admin>
+
+<style>
+  .back {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-size: var(--step-3);
+    margin: 0.5rem 0 1.5rem;
+  }
+</style>

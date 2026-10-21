@@ -1,0 +1,2 @@
+Videoclipurile sunt ale clientului, preluate de pe https://directpro.example/ (wp-content/uploads/2025/07 și 2026/01), descărcate 2026-10-12.
+Imaginile film-*.webp și echipa-*.webp sunt cadre extrase din aceste videoclipuri.

@@ -1,0 +1,237 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import ProductUnit from '../../components/ProductUnit.astro';
+import { contact } from '../../data/site';
+import { brandOf, formatPrice, getProduct, getProducts } from '../../lib/products';
+
+export const prerender = false;
+
+const product = await getProduct(Astro.params.id ?? '');
+if (!product) return Astro.rewrite('/404');
+
+const brand = brandOf(product.name);
+const related = (await getProducts()).filter((p) => p.id !== product.id && brandOf(p.name) === brand && p.inStock).slice(0, 4);
+---
+<Base title={product.name} description={`${product.name}, recondiționată, ${formatPrice(product.price)} cu TVA. Garanție 12 luni, piesa veche la schimb. DIRECTPRO, București.`}>
+  <section class="section product" aria-labelledby="p-title">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/">Acasă</a><span aria-hidden="true">/</span>
+        <a href="/magazin">Magazin</a><span aria-hidden="true">/</span>
+        <a href={`/magazin?marca=${encodeURIComponent(brand)}`}>{brand}</a>
+      </nav>
+
+      <div class="p-grid">
+        <figure class="p-media bay-frame">
+          <img src={product.image} alt={product.name} width="900" height="600" fetchpriority="high" />
+        </figure>
+
+        <div class="p-info">
+          <h1 id="p-title">{product.name}</h1>
+          {product.sku && <p class="sku">Cod produs: {product.sku}</p>}
+          <p class="price p-price">
+            {product.regularPrice && <del aria-label={`Preț inițial ${formatPrice(product.regularPrice)}`}>{formatPrice(product.regularPrice)}</del>}
+            {formatPrice(product.price)}
+          </p>
+          <p class="vat">Prețul include TVA.</p>
+
+          <div class="p-actions">
+            <button
+              class="btn btn--call add"
+              type="button"
+              data-add-to-cart
+              data-id={product.id}
+              data-name={product.name}
+              data-price={product.price}
+              data-image={product.image}
+              disabled={!product.inStock}
+            >
+              <Icon name="cart" />
+              <span data-label>{product.inStock ? 'Adaugă în coș' : 'Indisponibil momentan'}</span>
+            </button>
+            <a class="btn btn--ghost" href={contact.phoneHref}><Icon name="phone" />Verifică compatibilitatea</a>
+          </div>
+          <p class="cart-hint" data-cart-hint hidden>
+            <Icon name="check" size={18} /> Adăugat. <a href="/cos">Vezi coșul</a>
+          </p>
+
+          <ul class="facts">
+            <li><Icon name="check" /><span><strong>Garanție 12 luni</strong></span></li>
+            <li><Icon name="swap" /><span><strong>Piesa veche la schimb</strong>, la livrare</span></li>
+            <li><Icon name="truck" /><span><strong>Livrare rapidă din stoc</strong>, la nivel național</span></li>
+            <li><Icon name="shield" /><span><strong>Service autorizat R.A.R.</strong>, putem și monta caseta</span></li>
+          </ul>
+          <p class="p-note">
+            Casetele recondiționate din stoc îți permit să nu rămâi cu mașina blocată în service până se termină reparația.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section" aria-labelledby="rel-title">
+      <div class="wrap">
+        <h2 id="rel-title" class="rel-title">Alte casete {brand}</h2>
+        <div class="rel-grid">
+          {related.map((p) => <ProductUnit product={p} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<script>
+  import { addToCart } from '../../scripts/cart';
+  const btn = document.querySelector<HTMLButtonElement>('.p-actions [data-add-to-cart]');
+  const hint = document.querySelector<HTMLElement>('[data-cart-hint]');
+  btn?.addEventListener('click', () => {
+    const { id, name, price, image } = btn.dataset;
+    addToCart({ id: id!, name: name!, price: Number(price), image: image! });
+    if (hint) hint.hidden = false;
+  });
+</script>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  .crumbs a {
+    color: var(--ink-soft);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .p-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+    margin-top: 1rem;
+  }
+
+  .p-media {
+    --c: var(--ink);
+    margin: 0;
+    padding: 14px;
+  }
+
+  .p-media img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .p-media {
+    background-color: var(--floor);
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    font-stretch: 115%;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .sku {
+    margin-top: 0.75rem;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  .p-price {
+    margin-top: 1.5rem;
+    font-size: var(--step-4);
+    line-height: 1;
+  }
+
+  .p-price del {
+    display: block;
+    font-size: var(--step-1);
+    margin-bottom: 0.4rem;
+  }
+
+  .vat {
+    margin-top: 0.5rem;
+    color: var(--ink-soft);
+  }
+
+  .p-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .cart-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+    font-weight: 650;
+  }
+
+  .cart-hint[hidden] {
+    display: none;
+  }
+
+  .facts {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 2px solid var(--ink);
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .facts li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .facts :global(svg) {
+    flex: none;
+    color: var(--teal-ink);
+    margin-top: 0.15em;
+  }
+
+  .p-note {
+    margin-top: 1.25rem;
+    color: var(--ink-soft);
+    max-width: 50ch;
+  }
+
+  .rel-title {
+    font-size: var(--step-3);
+    margin-bottom: 1.5rem;
+  }
+
+  .rel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 860px) {
+    .p-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .p-actions .btn {
+      flex: 1 1 100%;
+    }
+  }
+</style>

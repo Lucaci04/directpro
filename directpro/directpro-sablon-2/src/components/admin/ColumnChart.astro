@@ -1,0 +1,149 @@
+---
+// Coloane pentru o singură serie pe zile (fără legendă: titlul numește seria).
+interface Props {
+  title: string;
+  data: { day: string; value: number }[];
+  unit: string;
+}
+const { title, data, unit } = Astro.props;
+const W = 760, H = 240, pad = { top: 22, right: 8, bottom: 30, left: 40 };
+const max = Math.max(...data.map((d) => d.value), 0);
+const niceStep = (m: number) => {
+  if (m <= 4) return 1;
+  const raw = m / 4, pow = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 5, 10].map((k) => k * pow).find((s) => s >= raw)!;
+};
+const step = niceStep(max);
+const top = Math.max(step * Math.ceil(max / step), step * 4);
+const ticks = Array.from({ length: top / step + 1 }, (_, i) => i * step);
+const plotW = W - pad.left - pad.right, plotH = H - pad.top - pad.bottom;
+const band = plotW / data.length;
+const barW = Math.min(24, band - 2);
+const y = (v: number) => pad.top + plotH - (v / top) * plotH;
+const fmtDay = (d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const peak = data.reduce((a, b) => (b.value > a.value ? b : a), data[0]);
+const bar = (x: number, v: number) => {
+  const h = (v / top) * plotH;
+  if (h <= 0) return '';
+  const r = Math.min(4, h, barW / 2);
+  const yb = pad.top + plotH, yt = yb - h;
+  return `M${x},${yb}V${yt + r}Q${x},${yt} ${x + r},${yt}H${x + barW - r}Q${x + barW},${yt} ${x + barW},${yt + r}V${yb}Z`;
+};
+---
+<figure class="chart">
+  <figcaption class="chart-title">{title}</figcaption>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${title}. Maxim ${peak?.value ?? 0} ${unit} pe ${peak ? fmtDay(peak.day) : '-'}.`}>
+    {ticks.map((t) => (
+      <g class="tick">
+        <line x1={pad.left} x2={W - pad.right} y1={y(t)} y2={y(t)} />
+        <text x={pad.left - 8} y={y(t)} dy="0.32em" text-anchor="end">{t >= 1000 ? `${t / 1000}K` : t}</text>
+      </g>
+    ))}
+    {data.map((d, i) => {
+      const x = pad.left + i * band + (band - barW) / 2;
+      return (
+        <g class="col" tabindex="0" data-tip={`${fmtDay(d.day)}: ${d.value} ${unit}`}>
+          <rect class="hit" x={pad.left + i * band} y={pad.top} width={band} height={plotH} />
+          <path d={bar(x, d.value)} />
+          {i % 5 === 0 && <text class="xl" x={x + barW / 2} y={H - 8} text-anchor="middle">{fmtDay(d.day)}</text>}
+        </g>
+      );
+    })}
+    {peak && peak.value > 0 && (
+      <text class="peak" x={pad.left + data.indexOf(peak) * band + band / 2} y={y(peak.value) - 7} text-anchor="middle">{peak.value}</text>
+    )}
+  </svg>
+  <details class="table-view">
+    <summary>Vezi datele ca tabel</summary>
+    <table>
+      <thead><tr><th scope="col">Zi</th><th scope="col" class="num">{unit}</th></tr></thead>
+      <tbody>{data.map((d) => <tr><td>{fmtDay(d.day)}</td><td class="num">{d.value}</td></tr>)}</tbody>
+    </table>
+  </details>
+</figure>
+
+<style>
+  .chart {
+    margin: 0;
+  }
+
+  .chart-title {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .tick line {
+    stroke: #e3e8ee;
+    stroke-width: 1;
+  }
+
+  .tick text,
+  .xl {
+    fill: var(--ink-faint);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col path {
+    fill: #2563b8;
+    transition: fill 120ms;
+  }
+
+  .col .hit {
+    fill: transparent;
+  }
+
+  .col:hover path,
+  .col:focus-visible path {
+    fill: #1a4a8c;
+  }
+
+  .col:focus-visible {
+    outline: none;
+  }
+
+  .col:focus-visible .hit {
+    fill: rgb(37 99 184 / 0.08);
+  }
+
+  .peak {
+    fill: var(--ink);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .table-view {
+    margin-top: 0.5rem;
+    font-size: var(--step--1);
+  }
+
+  .table-view summary {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--teal-ink);
+    font-weight: 600;
+  }
+
+  .table-view table {
+    border-collapse: collapse;
+    max-height: 300px;
+  }
+
+  .table-view td,
+  .table-view th {
+    padding: 0.25rem 1rem 0.25rem 0;
+    text-align: left;
+  }
+
+  .num {
+    text-align: right !important;
+  }
+</style>

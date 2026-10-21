@@ -1,0 +1,370 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import ColumnChart from '../../components/admin/ColumnChart.astro';
+import BarList from '../../components/admin/BarList.astro';
+import { formatPrice } from '../../lib/products';
+import { getDashboard } from '../../lib/stats';
+
+export const prerender = false;
+
+const ranges = [7, 30, 90];
+const requested = Number(Astro.url.searchParams.get('zile'));
+const range = ranges.includes(requested) ? requested : 30;
+const d = await getDashboard(range);
+
+const pageNames: Record<string, string> = {
+  '/': 'Acasă',
+  '/magazin': 'Magazin',
+  '/servicii': 'Servicii',
+  '/contact': 'Contact',
+  '/despre': 'Despre noi',
+  '/cos': 'Coș',
+};
+const pageLabel = (p: string) =>
+  pageNames[p] ?? (p.startsWith('/servicii/') ? `Serviciu: ${p.split('/')[2]}` : p.startsWith('/magazin/') ? `Produs: ${p.split('/')[2]}` : p);
+const dateTime = (iso: string) =>
+  new Date(iso).toLocaleString('ro-RO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Bucharest' });
+const tiles = [
+  { label: `Vizite, ultimele ${range} zile`, value: d.totalVisits.toLocaleString('ro-RO'), note: 'Pagini văzute, anonim' },
+  { label: 'Comenzi demo', value: String(d.orders.length), note: `Valoare ${formatPrice(d.ordersValue)}` },
+  { label: 'Mesaje primite', value: String(d.messages.length), note: 'Din formularul de contact' },
+  { label: 'Produse în stoc', value: `${d.catalog.inStock}/${d.catalog.total}`, note: 'În magazin acum' },
+];
+---
+<Admin title="Statistici">
+  <div class="head">
+    <div>
+      <h1>Statistici</h1>
+      <p class="sub">Date din această versiune demo a site-ului. Vizitele sunt numărate anonim, fără cookie-uri.</p>
+    </div>
+    <nav class="range" aria-label="Perioadă">
+      {ranges.map((r) => (
+        <a href={`/admin?zile=${r}`} aria-current={r === range ? 'true' : undefined}>{r} zile</a>
+      ))}
+    </nav>
+  </div>
+
+  <ul class="tiles">
+    {tiles.map((t, i) => (
+      <li class="tile" style={`--i:${i}`}>
+        <p class="tile-label">{t.label}</p>
+        <p class="tile-value">{t.value}</p>
+        <p class="tile-note">{t.note}</p>
+      </li>
+    ))}
+  </ul>
+
+  <section class="panel wide" aria-label="Vizite pe zi">
+    <ColumnChart title={`Vizite pe zi, ultimele ${range} zile`} data={d.perDay} unit="vizite" />
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <BarList title="Cele mai vizitate pagini" items={d.topPages.map((p) => ({ label: pageLabel(p.label), value: p.value }))} unit="vizite" empty="Încă nu există vizite în perioada aleasă." />
+    </section>
+    <section class="panel">
+      <BarList title="Produse comandate (bucăți)" items={d.topProducts} unit="buc." empty="Încă nu există comenzi demo în perioada aleasă." />
+    </section>
+    <section class="panel">
+      <BarList title="Mesaje pe subiect" items={d.topics} unit="mesaje" empty="Încă nu există mesaje în perioada aleasă." />
+    </section>
+  </div>
+
+  <div class="grid two">
+    <section class="panel">
+      <h2>Ultimele comenzi demo</h2>
+      {d.latestOrders.length === 0 ? (
+        <p class="empty">Comenzile trimise din coș vor apărea aici.</p>
+      ) : (
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Comandă</th><th scope="col">Client</th><th scope="col">Produse</th><th scope="col" class="num">Total</th></tr></thead>
+            <tbody>
+              {d.latestOrders.map((o) => (
+                <tr>
+                  <td><strong>#{o.id}</strong><span class="muted">{dateTime(o.createdAt)}</span></td>
+                  <td>{o.name}<span class="muted"><a href={`tel:${o.phone.replace(/\s/g, '')}`}>{o.phone}</a> · {o.delivery === 'curier' ? 'Curier' : 'Atelier'}</span></td>
+                  <td>{o.items.map((i) => <span class="item">{i.qty} × {i.name}</span>)}</td>
+                  <td class="num price">{formatPrice(o.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+    <section class="panel">
+      <h2>Ultimele mesaje</h2>
+      {d.latestMessages.length === 0 ? (
+        <p class="empty">Mesajele din pagina de contact vor apărea aici.</p>
+      ) : (
+        <ul class="messages">
+          {d.latestMessages.map((m) => (
+            <li>
+              <p class="msg-head"><strong>{m.name}</strong> · <a href={`tel:${m.phone.replace(/\s/g, '')}`}>{m.phone}</a><span class="muted">{dateTime(m.createdAt)}</span></p>
+              <p class="msg-topic">{m.topic}</p>
+              <p class="msg-text">{m.text}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  </div>
+
+  <div class="tooltip" role="tooltip" data-tooltip hidden></div>
+</Admin>
+
+<script>
+  // Tooltip comun pentru coloane și bare (hover și focus de la tastatură).
+  const tip = document.querySelector<HTMLElement>('[data-tooltip]')!;
+  const show = (el: HTMLElement) => {
+    tip.textContent = el.dataset.tip!;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const t = tip.getBoundingClientRect();
+    tip.style.left = `${Math.min(innerWidth - t.width - 8, Math.max(8, r.left + r.width / 2 - t.width / 2))}px`;
+    tip.style.top = `${Math.max(8, r.top - t.height - 8)}px`;
+  };
+  document.querySelectorAll<HTMLElement>('[data-tip]').forEach((el) => {
+    el.addEventListener('mouseenter', () => show(el));
+    el.addEventListener('focus', () => show(el));
+    el.addEventListener('mouseleave', () => (tip.hidden = true));
+    el.addEventListener('blur', () => (tip.hidden = true));
+  });
+</script>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+  }
+
+  .sub {
+    margin-top: 0.4rem;
+    color: var(--ink-soft);
+  }
+
+  .range {
+    display: inline-flex;
+    padding: 4px;
+    gap: 4px;
+    background: var(--floor-deep);
+    border-radius: var(--radius);
+  }
+
+  .range a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 1rem;
+    border-radius: 7px;
+    color: var(--ink);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .range a[aria-current] {
+    background: var(--paper);
+    box-shadow: 0 1px 3px rgb(15 31 51 / 0.15);
+  }
+
+  .tiles {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .tile {
+    padding: 1.25rem 1.35rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .tile:first-child {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+
+  .tile:first-child .tile-label,
+  .tile:first-child .tile-note {
+    color: #c6d3e4;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tile {
+      animation: rise 600ms var(--ease-out) both;
+      animation-delay: calc(var(--i) * 70ms);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  .tile-label {
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  .tile-value {
+    margin: 0.35rem 0 0.2rem;
+    font-size: var(--step-3);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .tile-note {
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  .panel {
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .wide {
+    margin-bottom: 1.25rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .grid.two {
+    grid-template-columns: 1.4fr 1fr;
+  }
+
+  .panel h2 {
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .empty {
+    color: var(--ink-faint);
+    padding: 1.5rem;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  th,
+  td {
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    color: var(--ink-soft);
+    font-weight: 650;
+  }
+
+  .num {
+    text-align: right;
+  }
+
+  .muted {
+    display: block;
+    color: var(--ink-faint);
+  }
+
+  .item {
+    display: block;
+  }
+
+  .messages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .messages li {
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .msg-head .muted {
+    display: inline;
+    margin-left: 0.5rem;
+  }
+
+  .msg-topic {
+    display: inline-block;
+    margin: 0.3rem 0;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: #e8eef7;
+    color: var(--teal-ink);
+    font-weight: 650;
+  }
+
+  .msg-text {
+    color: var(--ink-soft);
+    white-space: pre-line;
+  }
+
+  .tooltip {
+    position: fixed;
+    z-index: 80;
+    padding: 0.4rem 0.65rem;
+    border-radius: 6px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    pointer-events: none;
+    box-shadow: 0 6px 18px -6px rgb(15 31 51 / 0.5);
+  }
+
+  @media (max-width: 1000px) {
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid,
+    .grid.two {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

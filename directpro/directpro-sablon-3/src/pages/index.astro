@@ -1,0 +1,1109 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ProductUnit from '../components/ProductUnit.astro';
+import { contact, services, symptoms, testimonials, workflow } from '../data/site';
+import { team } from '../data/team';
+import { brands, getProducts } from '../lib/products';
+
+export const prerender = false;
+
+const products = await getProducts();
+const preferred = ['caseta-directie-dacia-duster', 'caseta-directie-vw-golf-7', 'caseta-directie-ford-transit', 'caseta-directie-bmw-seria-3-e46'];
+const featured = [...preferred.map((id) => products.find((p) => p.id === id)).filter((p) => p !== undefined), ...products]
+  .filter((p, i, all) => all.indexOf(p) === i && p.inStock)
+  .slice(0, 4);
+const brandList = brands(products);
+
+// Capitole din filmul clientului (momente observate în video).
+const chapters = [
+  { t: 10, label: 'Intrarea în atelier', poster: '/video/film-12.webp' },
+  { t: 20, label: 'Sub mașină, la elevator', poster: '/video/film-22.webp' },
+  { t: 26, label: 'Demontarea casetei', poster: '/video/film-27.webp' },
+  { t: 32, label: 'La bancul de lucru', poster: '/video/film-33.webp' },
+  { t: 60, label: 'Geometrie 3D', poster: '/video/film-62.webp' },
+];
+const stories = [
+  { file: 'andrei-popa', name: 'Andrei Popa', role: 'Director dezvoltare' },
+  { file: 'ana-vlad', name: 'Ana Vlad', role: 'Consilier vânzări' },
+  { file: 'iulian-barbu', name: 'Iulian Barbu', role: 'Tehnician' },
+  { file: 'raluca-enache', name: 'Raluca Enache', role: 'Contabilitate' },
+];
+---
+<Base
+  title="DIRECTPRO · Reparații și recondiționări casete de direcție, București"
+  description="Atelier autorizat R.A.R. din București: reparații și recondiționări casete de direcție, pompe de servodirecție, coloane, geometrie 3D și calibrări ADAS, din 2007. Sună la 0300 000 301."
+  lane={false}
+>
+  <!-- Hero cu filmul din atelier -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-media" aria-hidden="true">
+      <video class="hero-video" data-hero-video muted playsinline preload="none" poster="/video/film-33.webp"></video>
+      <div class="hero-shade"></div>
+    </div>
+    <div class="hero-content wrap">
+      <p class="hero-place"><span class="dot" aria-hidden="true"></span>Atelier autorizat R.A.R. · București · din 2007</p>
+      <h1 id="hero-title">
+        <span class="line"><span>Casete de direcție</span></span>
+        <span class="line"><span>reparate și</span></span>
+        <span class="line"><span>recondiționate</span></span>
+      </h1>
+      <div class="hero-bottom">
+        <p class="lede">Diagnoză, reparație și test pe banc pentru casete de direcție și pompe de servodirecție, la orice marcă.</p>
+        <div class="hero-actions">
+          <a class="btn btn--call" href={contact.phoneHref}><Icon name="phone" />{contact.phoneDisplay}</a>
+          <a class="btn btn--glass" href="#film"><Icon name="arrow-down" />Vezi atelierul</a>
+          <button class="btn btn--glass btn--icon" type="button" data-hero-toggle aria-pressed="false" hidden>
+            <span data-label>Oprește video</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mărci -->
+  <div class="ticker" role="note" aria-label={`Casete în stoc pentru: ${brandList.join(', ')}`}>
+    <div class="ticker-track" aria-hidden="true">
+      {[0, 1].map(() => (
+        <ul>{brandList.map((b) => <li>{b}</li>)}</ul>
+      ))}
+    </div>
+  </div>
+
+  <!-- Simptome -->
+  <section class="section symptoms" aria-labelledby="simptome-title">
+    <div class="wrap sym-grid">
+      <div class="sym-head">
+        <h2 id="simptome-title">Ce simți la volan?</h2>
+        <p class="lede">Alege simptomul și te ducem la serviciul potrivit. Dacă nu ești sigur, sună: pornim de la diagnoză.</p>
+      </div>
+      <ol class="sym-list">
+        {symptoms.map((s, i) => (
+          <li class="sym paint-in" style={`--i:${i}`}>
+            <span class="sym-n" aria-hidden="true">0{i + 1}</span>
+            <div>
+              <h3>{s.label}</h3>
+              <p>{s.detail}</p>
+              <p class="sym-links">
+                {s.services.map((slug) => {
+                  const svc = services.find((x) => x.slug === slug)!;
+                  return <a href={`/servicii/${slug}`}>{svc.name}<Icon name="arrow" size={16} /></a>;
+                })}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Servicii: listă mare, imaginea apare la hover -->
+  <section class="section svc" aria-labelledby="svc-title">
+    <div class="wrap">
+      <h2 id="svc-title" class="svc-title">Servicii</h2>
+      <ul class="svc-list">
+        {services.map((s) => (
+          <li>
+            <a class="svc-row" href={`/servicii/${s.slug}`}>
+              <span class="svc-bay" aria-hidden="true">{s.bay}</span>
+              <span class="svc-name">{s.name}</span>
+              <span class="svc-short">{s.short}</span>
+              <Image class="svc-peek" src={s.photo} alt="" widths={[480, 720]} sizes="360px" />
+              <Icon name="arrow" size={28} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Filmul -->
+  <section class="section film" id="film" aria-labelledby="film-title">
+    <div class="wrap">
+      <div class="film-head">
+        <h2 id="film-title">O zi în atelier</h2>
+        <p class="lede">Filmul DIRECTPRO, 1 min 23 s. Alege un moment sau pornește de la început.</p>
+      </div>
+      <div class="film-stage">
+        <video class="film-video" data-film controls playsinline preload="none" poster="/video/film-12.webp">
+          <source src="/video/atelier-film.mp4" type="video/mp4" />
+          Browserul tău nu poate reda video. <a href="/video/atelier-film.mp4">Descarcă filmul</a>.
+        </video>
+      </div>
+      <ol class="chapters" aria-label="Momente din film">
+        {chapters.map((c) => (
+          <li>
+            <button type="button" data-chapter={c.t}>
+              <img src={c.poster} alt="" width="320" height="180" loading="lazy" />
+              <span class="ch-time">{`0:${String(c.t).padStart(2, '0')}`}</span>
+              <span class="ch-label">{c.label}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Procesul -->
+  <section class="section flow" aria-labelledby="flow-title">
+    <div class="wrap flow-grid">
+      <div class="flow-head">
+        <h2 id="flow-title">De la diagnoză la test pe banc</h2>
+        <p class="lede">Același traseu pentru fiecare casetă, înainte să ajungă înapoi pe mașină.</p>
+      </div>
+      <ol class="flow-steps">
+        {workflow.map((w, i) => (
+          <li class="step paint-in">
+            <Image class="step-photo" src={w.photo} alt={w.alt} widths={[400, 640]} sizes="(max-width: 860px) 100vw, 320px" />
+            <div>
+              <span class="step-n" aria-hidden="true">{i + 1}</span>
+              <h3>{w.title}</h3>
+              <p>{w.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Echipa în clipuri -->
+  <section class="section crew" aria-labelledby="crew-title">
+    <div class="wrap">
+      <div class="crew-head">
+        <h2 id="crew-title">Oamenii DIRECTPRO</h2>
+        <p class="lede">{team.length} oameni în atelier și la birou. Câțiva dintre ei, în clipurile lor.</p>
+      </div>
+      <ul class="stories">
+        {stories.map((s) => (
+          <li class="story">
+            <video data-story muted loop playsinline preload="none" poster={`/video/echipa-${s.file}.webp`} aria-label={`Clip de prezentare: ${s.name}, ${s.role}`}>
+              <source src={`/video/echipa-${s.file}.mp4`} type="video/mp4" />
+            </video>
+            <p class="story-name">{s.name}</p>
+            <p class="story-role">{s.role}</p>
+          </li>
+        ))}
+      </ul>
+      <ul class="faces" aria-label="Restul echipei">
+        {team.filter((m) => !stories.some((s) => s.name === m.name)).map((m) => (
+          <li title={`${m.name}, ${m.role}`}>
+            <Image src={m.photo} alt={`${m.name}, ${m.role}`} widths={[120]} sizes="60px" />
+          </li>
+        ))}
+      </ul>
+      <a class="more" href="/despre">Toată echipa <Icon name="arrow" size={18} /></a>
+    </div>
+  </section>
+
+  <!-- Din stoc -->
+  <section class="section stock" aria-labelledby="stock-title">
+    <div class="wrap">
+      <div class="stock-head">
+        <h2 id="stock-title">Casete recondiționate, din stoc</h2>
+        <ul class="terms">
+          <li><Icon name="check" />Garanție 12 luni</li>
+          <li><Icon name="swap" />Piesa veche la schimb</li>
+          <li><Icon name="truck" />Livrare în toată țara</li>
+          <li><Icon name="check" />Prețul include TVA</li>
+        </ul>
+      </div>
+      <div class="stock-grid">{featured.map((p) => <ProductUnit product={p} />)}</div>
+      <a class="btn btn--ghost" href="/magazin">Vezi toate cele {products.length} de casete <Icon name="arrow" /></a>
+    </div>
+  </section>
+
+  <!-- Clienți -->
+  <section class="section voices" aria-labelledby="voices-title">
+    <div class="wrap">
+      <h2 id="voices-title" class="visually-hidden">Ce spun clienții</h2>
+      <figure class="big-quote">
+        <blockquote><p>„{testimonials[0].quote}”</p></blockquote>
+        <figcaption>{testimonials[0].name}</figcaption>
+      </figure>
+      <div class="small-quotes">
+        {testimonials.slice(1).map((t) => (
+          <figure>
+            <blockquote><p>„{t.quote}”</p></blockquote>
+            <figcaption>{t.name}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Apel -->
+  <section class="cta" aria-labelledby="cta-title">
+    <div class="wrap cta-inner">
+      <h2 id="cta-title" class="visually-hidden">Sună la recepție</h2>
+      <a class="cta-phone" href={contact.phoneHref} aria-label={`Sună la recepție: ${contact.phoneDisplay}`}>{contact.phoneDisplay}</a>
+      <div class="cta-meta">
+        <p>{contact.hours}</p>
+        <p>{contact.street}, {contact.building}, {contact.city}</p>
+        <p class="cta-links">
+          <a href={contact.whatsappHref} rel="noopener" target="_blank">WhatsApp</a>
+          <a href={contact.mapsHref} rel="noopener" target="_blank">Google Maps</a>
+          <a href={contact.wazeHref} rel="noopener" target="_blank">Waze</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  const light = Boolean(conn?.saveData);
+
+  // Hero: bucla 20–52 s din film, doar pe ecrane mari, fără reduced motion / economisire date.
+  const hero = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-hero-toggle]');
+  if (hero && !reduce && !light && innerWidth >= 700) {
+    const START = 20;
+    const END = 52;
+    hero.src = '/video/atelier-film.mp4#t=' + START;
+    hero.preload = 'auto';
+    hero.addEventListener('timeupdate', () => {
+      if (hero.currentTime > END) hero.currentTime = START;
+    });
+    hero.addEventListener('playing', () => hero.classList.add('is-playing'), { once: true });
+    hero.play().catch(() => {});
+    if (toggle) {
+      toggle.hidden = false;
+      toggle.addEventListener('click', () => {
+        const pause = !hero.paused;
+        if (pause) hero.pause();
+        else hero.play();
+        toggle.setAttribute('aria-pressed', String(pause));
+        toggle.querySelector('[data-label]')!.textContent = pause ? 'Pornește video' : 'Oprește video';
+      });
+    }
+  }
+
+  // Filmul: capitolele sar la momentul ales.
+  const film = document.querySelector<HTMLVideoElement>('[data-film]');
+  document.querySelectorAll<HTMLButtonElement>('[data-chapter]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!film) return;
+      const t = Number(btn.dataset.chapter);
+      if (film.readyState < 1) {
+        film.preload = 'auto';
+        film.load();
+        await new Promise((r) => film.addEventListener('loadedmetadata', r, { once: true }));
+      }
+      film.currentTime = t;
+      film.play().catch(() => {});
+      film.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    });
+  });
+  film?.addEventListener('play', () => hero?.pause());
+
+  // Clipurile echipei pornesc când sunt în vizor.
+  const stories = document.querySelectorAll<HTMLVideoElement>('[data-story]');
+  if (!reduce && !light && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          const v = e.target as HTMLVideoElement;
+          if (e.isIntersecting) {
+            v.preload = 'auto';
+            v.play().catch(() => {});
+          } else v.pause();
+        }),
+      { threshold: 0.5 },
+    );
+    stories.forEach((v) => io.observe(v));
+  } else {
+    stories.forEach((v) => {
+      v.controls = true;
+    });
+  }
+</script>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: min(calc(100svh - 4.5rem), 940px);
+    display: grid;
+    align-items: end;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #000 url('/video/film-33.webp') center / cover no-repeat;
+  }
+
+  .hero-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1200ms var(--ease-out);
+  }
+
+  .hero-video:global(.is-playing) {
+    opacity: 1;
+  }
+
+  .hero-shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgb(12 14 17 / 0.55) 0%, rgb(12 14 17 / 0.1) 35%, rgb(12 14 17 / 0.7) 70%, var(--floor) 100%),
+      linear-gradient(90deg, rgb(12 14 17 / 0.75), transparent 65%);
+  }
+
+  .hero-content {
+    padding-block: clamp(5rem, 14vh, 9rem) clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .hero-place {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: 999px;
+    background: rgb(12 14 17 / 0.45);
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3ddc84;
+    box-shadow: 0 0 0 0 rgb(61 220 132 / 0.6);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dot {
+      animation: pulse 2.4s infinite;
+    }
+  }
+
+  @keyframes pulse {
+    70% {
+      box-shadow: 0 0 0 10px rgb(61 220 132 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(61 220 132 / 0);
+    }
+  }
+
+  .hero h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-5);
+    line-height: 0.88;
+  }
+
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.04em;
+  }
+
+  .line > span {
+    display: inline-block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .line > span {
+      animation: up 1100ms var(--ease-out) both;
+    }
+
+    .line:nth-child(2) > span {
+      animation-delay: 120ms;
+    }
+
+    .line:nth-child(3) > span {
+      animation-delay: 240ms;
+    }
+  }
+
+  @keyframes up {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  .hero-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem 3rem;
+    margin-top: 2rem;
+  }
+
+  .hero .lede {
+    max-width: 44ch;
+    color: #d6dae0;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .btn--glass {
+    --btn-bg: rgb(255 255 255 / 0.08);
+    --btn-fg: #fff;
+    border-color: rgb(255 255 255 / 0.4);
+  }
+
+  .btn--glass:hover {
+    --btn-bg: #fff;
+    --btn-fg: #0c0e11;
+  }
+
+  .btn--icon[hidden] {
+    display: none;
+  }
+
+  /* ---------- Ticker ---------- */
+  .ticker {
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+  }
+
+  .ticker ul {
+    display: flex;
+    gap: 3rem;
+    margin: 0;
+    padding: 1.1rem 1.5rem;
+    list-style: none;
+  }
+
+  .ticker li {
+    font-family: var(--display);
+    font-size: var(--step-2);
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .ticker li::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 3rem;
+    border-radius: 50%;
+    background: var(--teal);
+    vertical-align: middle;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ticker-track {
+      animation: ticker 38s linear infinite;
+    }
+
+    .ticker:hover .ticker-track {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ---------- Section basics ---------- */
+  .section h2 {
+    font-size: var(--step-4);
+  }
+
+  .lede {
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Symptoms ---------- */
+  .sym-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    gap: 3rem clamp(2rem, 6vw, 6rem);
+    align-items: start;
+  }
+
+  .sym-head {
+    position: sticky;
+    top: 7rem;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .sym-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sym {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    padding: 2rem 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .sym-n {
+    font-family: var(--display);
+    font-size: var(--step-2);
+    font-weight: 800;
+    color: var(--teal);
+  }
+
+  .sym h3 {
+    font-size: var(--step-2);
+    margin-bottom: 0.5rem;
+  }
+
+  .sym p {
+    color: var(--ink-soft);
+    max-width: 52ch;
+  }
+
+  .sym-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .sym-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: var(--step--1);
+    text-decoration: none;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+  }
+
+  .sym-links a:hover {
+    background: var(--lane);
+    border-color: var(--lane);
+  }
+
+  /* ---------- Services list ---------- */
+  .svc {
+    background: var(--paper);
+  }
+
+  .svc-title {
+    margin-bottom: 2rem;
+  }
+
+  .svc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .svc-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1.3fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 2.5vw, 2rem) 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .svc-bay {
+    font-family: var(--display);
+    font-size: var(--step-1);
+    font-weight: 700;
+    color: var(--ink-faint);
+  }
+
+  .svc-name {
+    font-family: var(--display);
+    font-size: var(--step-3);
+    font-weight: 800;
+    line-height: 0.95;
+    text-transform: uppercase;
+    transition: transform 400ms var(--ease-out), color 300ms var(--ease-out);
+  }
+
+  .svc-short {
+    color: var(--ink-soft);
+  }
+
+  .svc-row :global(.svc-peek) {
+    position: absolute;
+    right: 5rem;
+    top: 50%;
+    width: 320px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(-50%) rotate(-3deg) scale(0.92);
+    clip-path: inset(50% 0 50% 0 round 14px);
+    transition:
+      opacity 300ms var(--ease-out),
+      transform 600ms var(--ease-out),
+      clip-path 600ms var(--ease-out);
+    box-shadow: var(--shadow);
+  }
+
+  .svc-row > :global(svg) {
+    transition: transform 400ms var(--ease-out);
+  }
+
+  .svc-row:hover .svc-name,
+  .svc-row:focus-visible .svc-name {
+    transform: translateX(0.75rem);
+    color: var(--teal-ink);
+  }
+
+  .svc-row:hover :global(.svc-peek) {
+    opacity: 1;
+    transform: translateY(-50%) rotate(-3deg) scale(1);
+    clip-path: inset(0 0 0 0 round 14px);
+  }
+
+  .svc-row:hover > :global(svg) {
+    transform: translateX(6px) rotate(-45deg);
+  }
+
+  /* ---------- Film ---------- */
+  .film-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem 3rem;
+    margin-bottom: 2rem;
+  }
+
+  .film-head .lede {
+    max-width: 42ch;
+  }
+
+  .film-stage {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    box-shadow: var(--shadow);
+  }
+
+  .film-video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+  }
+
+  .chapters {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .chapters button {
+    display: grid;
+    gap: 0.35rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .chapters img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 10px;
+    filter: grayscale(0.6) brightness(0.8);
+    transition: filter 300ms var(--ease-out), transform 300ms var(--ease-out);
+  }
+
+  .chapters button:hover img,
+  .chapters button:focus-visible img {
+    filter: none;
+    transform: translateY(-3px);
+  }
+
+  .ch-time {
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: var(--teal-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ch-label {
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* ---------- Flow ---------- */
+  .flow {
+    background: var(--paper);
+  }
+
+  .flow-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    gap: 3rem clamp(2rem, 6vw, 6rem);
+    align-items: start;
+  }
+
+  .flow-head {
+    position: sticky;
+    top: 7rem;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .flow-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--floor);
+  }
+
+  .step :global(.step-photo) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .step-n {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--lane);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .step h3 {
+    margin: 0.75rem 0 0.4rem;
+    font-size: var(--step-2);
+  }
+
+  .step p {
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Crew ---------- */
+  .crew-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem 3rem;
+    margin-bottom: 2rem;
+  }
+
+  .crew-head .lede {
+    max-width: 40ch;
+  }
+
+  .stories {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .story video {
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: #0a2fa6;
+  }
+
+  .story-name {
+    margin-top: 0.75rem;
+    font-weight: 700;
+  }
+
+  .story-role {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .faces {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .faces li {
+    margin-right: -10px;
+  }
+
+  .faces :global(img) {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 50%;
+    border: 3px solid var(--floor);
+    background: #12286b;
+    transition: transform 250ms var(--ease-out);
+  }
+
+  .faces li:hover :global(img) {
+    transform: translateY(-6px);
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    margin-top: 1rem;
+    font-weight: 650;
+  }
+
+  /* ---------- Stock ---------- */
+  .stock-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 1.5rem 4rem;
+    align-items: end;
+    margin-bottom: 2rem;
+  }
+
+  .terms {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.5rem;
+    font-weight: 650;
+  }
+
+  .terms li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .terms :global(svg) {
+    color: var(--teal-ink);
+  }
+
+  .stock-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  /* ---------- Voices ---------- */
+  .big-quote {
+    margin: 0 0 3rem;
+  }
+
+  .big-quote p {
+    font-family: var(--display);
+    font-size: var(--step-3);
+    font-weight: 700;
+    line-height: 1.05;
+    text-transform: uppercase;
+    max-width: 30ch;
+  }
+
+  figure,
+  blockquote {
+    margin: 0;
+  }
+
+  figcaption {
+    margin-top: 1rem;
+    font-weight: 700;
+    color: var(--teal-ink);
+  }
+
+  .small-quotes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .small-quotes p {
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+  }
+
+  /* ---------- CTA ---------- */
+  .cta {
+    background: var(--lane);
+    color: #fff;
+    padding-block: clamp(4rem, 9vw, 8rem);
+    overflow: hidden;
+  }
+
+  .cta-inner {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .cta-phone {
+    font-family: var(--display);
+    font-size: clamp(3.5rem, 1.5rem + 11vw, 12rem);
+    font-weight: 800;
+    line-height: 0.85;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: letter-spacing 500ms var(--ease-out);
+  }
+
+  .cta-phone:hover {
+    letter-spacing: 0.02em;
+  }
+
+  .cta-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2.5rem;
+    font-weight: 600;
+  }
+
+  .cta-links {
+    display: flex;
+    gap: 1.25rem;
+  }
+
+  .cta-links a {
+    color: #fff;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px) {
+    .stock-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chapters {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .svc-row :global(.svc-peek) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .sym-grid,
+    .flow-grid,
+    .stock-head,
+    .small-quotes {
+      grid-template-columns: 1fr;
+    }
+
+    .sym-head,
+    .flow-head {
+      position: static;
+    }
+
+    .svc-row {
+      grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    }
+
+    .svc-short {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .step {
+      grid-template-columns: 1fr;
+    }
+
+    .stories {
+      grid-template-columns: repeat(4, 62vw);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 0.5rem;
+    }
+
+    .story {
+      scroll-snap-align: start;
+    }
+
+    .chapters {
+      grid-template-columns: repeat(5, 46vw);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+    }
+
+    .hero-actions .btn {
+      flex: 1 1 auto;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .terms {
+      grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.9rem, 13.5vw, 4rem);
+    }
+  }
+</style>

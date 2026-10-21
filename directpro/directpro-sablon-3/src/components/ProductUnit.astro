@@ -1,0 +1,165 @@
+---
+import Icon from './Icon.astro';
+import { formatPrice, type Product } from '../lib/products';
+
+interface Props {
+  product: Product;
+  headingLevel?: 'h2' | 'h3';
+}
+const { product: p, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+---
+<article class="unit">
+  <a class="unit-media" href={`/magazin/${p.id}`} tabindex="-1" aria-hidden="true">
+    <img src={p.image} alt="" width="900" height="600" loading="lazy" decoding="async" />
+  </a>
+  <div class="unit-body">
+    <Heading class="unit-name"><a href={`/magazin/${p.id}`}>{p.name}</a></Heading>
+    <p class="price">
+      {p.regularPrice && <del aria-label={`Preț inițial ${formatPrice(p.regularPrice)}`}>{formatPrice(p.regularPrice)}</del>}
+      {formatPrice(p.price)}
+    </p>
+    <button
+      class="btn btn--ghost unit-add"
+      type="button"
+      data-add-to-cart
+      data-id={p.id}
+      data-name={p.name}
+      data-price={p.price}
+      data-image={p.image}
+      disabled={!p.inStock}
+    >
+      <Icon name="plus" />
+      <span data-label>{p.inStock ? 'Adaugă în coș' : 'Indisponibil'}</span>
+    </button>
+  </div>
+</article>
+
+<script>
+  import { addToCart } from '../scripts/cart';
+  document.querySelectorAll<HTMLButtonElement>('.unit [data-add-to-cart]').forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      const { id, name, price, image } = btn.dataset;
+      addToCart({ id: id!, name: name!, price: Number(price), image: image! });
+      const label = btn.querySelector('[data-label]');
+      if (!label) return;
+      label.textContent = 'Adăugat în coș';
+      btn.classList.add('is-added');
+      setTimeout(() => {
+        label.textContent = 'Adaugă în coș';
+        btn.classList.remove('is-added');
+      }, 1800);
+    });
+  });
+</script>
+
+<style>
+  .unit {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
+  }
+
+  .unit:hover {
+    border-color: #aab4c1;
+    box-shadow: var(--shadow);
+  }
+
+  .unit-media {
+    display: block;
+    aspect-ratio: 3 / 2;
+    background: #eceef1;
+    overflow: hidden;
+  }
+
+  .unit-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.5rem;
+    mix-blend-mode: multiply;
+    transition: transform 500ms var(--ease-out);
+  }
+
+  .unit:hover .unit-media img {
+    transform: scale(1.04);
+  }
+
+  .unit-body {
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    gap: 0.6rem;
+    padding: 1rem 1.1rem 1.15rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .unit-name {
+    font-family: var(--font);
+    text-transform: none;
+    font-size: var(--step-0);
+    font-stretch: 100%;
+    font-weight: 650;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
+  .unit-name a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .unit-name a:hover {
+    text-decoration: underline;
+  }
+
+  .unit .price {
+    font-size: var(--step-1);
+  }
+
+  .unit-add {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  @media (max-width: 560px) {
+    .unit-body {
+      padding: 0.75rem;
+    }
+
+    .unit-name {
+      font-size: var(--step--1);
+    }
+
+    .unit-add {
+      padding-inline: 0.5rem;
+      font-size: var(--step--1);
+    }
+
+    .unit-add :global(svg) {
+      display: none;
+    }
+
+    .unit .price {
+      font-size: var(--step-0);
+      white-space: normal;
+    }
+
+    .unit .price del {
+      display: block;
+      font-size: var(--step--1);
+    }
+  }
+
+  .unit-add.is-added {
+    --btn-bg: var(--lane);
+    --btn-fg: var(--ink);
+    border-color: var(--lane);
+  }
+</style>

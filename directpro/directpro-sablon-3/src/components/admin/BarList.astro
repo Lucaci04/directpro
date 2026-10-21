@@ -1,0 +1,116 @@
+---
+// Bare orizontale pentru clasamente (o singură serie, valoarea la capătul barei).
+interface Props {
+  title: string;
+  items: { label: string; value: number }[];
+  unit: string;
+  empty: string;
+}
+const { title, items, unit, empty } = Astro.props;
+const max = Math.max(...items.map((i) => i.value), 1);
+---
+<figure class="bars">
+  <figcaption class="chart-title">{title}</figcaption>
+  {items.length === 0 ? (
+    <p class="empty">{empty}</p>
+  ) : (
+    <ol>
+      {items.map((i) => (
+        <li tabindex="0" data-tip={`${i.label}: ${i.value} ${unit}`}>
+          <span class="bar-label">{i.label}</span>
+          <span class="track">
+            <span class="fill" style={`--w:${(i.value / max) * 100}%`}></span>
+            <span class="value">{i.value}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  )}
+</figure>
+
+<style>
+  .bars {
+    margin: 0;
+  }
+
+  .chart-title {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: 0.75rem;
+    align-items: center;
+    font-size: var(--step--1);
+    border-radius: 6px;
+  }
+
+  li:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    box-shadow: none;
+  }
+
+  .bar-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-soft);
+  }
+
+  .track {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .fill {
+    width: var(--w);
+    min-width: 3px;
+    height: 16px;
+    border-radius: 0 4px 4px 0;
+    background: #2563b8;
+    transform-origin: left;
+    transition: background-color 120ms;
+  }
+
+  li:hover .fill {
+    background: #1a4a8c;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .fill {
+      animation: grow 700ms var(--ease-out) both;
+    }
+  }
+
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  .value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .empty {
+    color: var(--ink-faint);
+    padding: 1.5rem;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+</style>

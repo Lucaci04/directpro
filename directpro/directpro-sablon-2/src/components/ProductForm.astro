@@ -1,0 +1,116 @@
+---
+import type { FormErrors, FormValues } from '../lib/product-form';
+
+interface Props {
+  values: FormValues;
+  errors: FormErrors;
+  image?: string;
+  submitLabel: string;
+}
+const { values, errors, image, submitLabel } = Astro.props;
+const invalid = (k: keyof FormErrors) => (errors[k] ? 'true' : undefined);
+const describedBy = (k: keyof FormErrors) => (errors[k] ? `err-${k}` : undefined);
+---
+<form class="pform" method="post" enctype="multipart/form-data" novalidate>
+  {Object.keys(errors).length > 0 && (
+    <p class="notice notice--error" role="alert">Formularul are erori. Corectează câmpurile marcate.</p>
+  )}
+  <div class="field">
+    <label for="name">Nume produs</label>
+    <input id="name" name="name" value={values.name} required maxlength="120" aria-invalid={invalid('name')} aria-describedby={describedBy('name')} />
+    {errors.name && <p class="error-text" id="err-name">{errors.name}</p>}
+  </div>
+  <div class="row">
+    <div class="field">
+      <label for="price">Preț (lei, TVA inclus)</label>
+      <input id="price" name="price" inputmode="decimal" value={values.price} required aria-invalid={invalid('price')} aria-describedby={describedBy('price')} />
+      {errors.price && <p class="error-text" id="err-price">{errors.price}</p>}
+    </div>
+    <div class="field">
+      <label for="regularPrice">Preț inițial <span class="opt">(opțional, pentru reducere)</span></label>
+      <input id="regularPrice" name="regularPrice" inputmode="decimal" value={values.regularPrice} aria-invalid={invalid('regularPrice')} aria-describedby={describedBy('regularPrice')} />
+      {errors.regularPrice && <p class="error-text" id="err-regularPrice">{errors.regularPrice}</p>}
+    </div>
+  </div>
+  <div class="field">
+    <label for="sku">Cod produs <span class="opt">(opțional)</span></label>
+    <input id="sku" name="sku" value={values.sku} maxlength="40" aria-invalid={invalid('sku')} aria-describedby={describedBy('sku')} />
+    {errors.sku && <p class="error-text" id="err-sku">{errors.sku}</p>}
+  </div>
+  <div class="field">
+    <label for="image">Imagine {image ? <span class="opt">(lasă gol ca să păstrezi imaginea actuală)</span> : null}</label>
+    {image && <img class="current" src={image} alt="Imaginea actuală" width="240" height="160" />}
+    <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-invalid={invalid('image')} aria-describedby={errors.image ? 'err-image' : 'hint-image'} />
+    <p class="hint" id="hint-image">JPG, PNG sau WebP, maximum 3 MB.</p>
+    {errors.image && <p class="error-text" id="err-image">{errors.image}</p>}
+  </div>
+  <label class="check">
+    <input type="checkbox" name="inStock" checked={values.inStock} />
+    <span>În stoc (se poate adăuga în coș)</span>
+  </label>
+  <div class="actions">
+    <button class="btn" type="submit">{submitLabel}</button>
+    <a class="btn btn--ghost" href="/admin/produse">Renunță</a>
+  </div>
+</form>
+
+<style>
+  .pform {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 640px;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: var(--paper);
+    border: 1px solid var(--line);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .opt {
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  .current {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--line);
+  }
+
+  input[type='file'] {
+    min-height: 48px;
+    font: inherit;
+  }
+
+  .check {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .check input {
+    width: 20px;
+    height: 20px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 560px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.env
+data/uploads/*
+!data/uploads/.gitkeep
+data/orders.json
+data/messages.json
+data/visits.json

@@ -1,0 +1,463 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { contact } from '../data/site';
+---
+<Base title="Coș" description="Coșul de cumpărături DIRECTPRO (demo)." noindex>
+  <section class="section cart-page" aria-labelledby="cart-title">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <h1 id="cart-title">Coș</h1>
+      <p class="notice notice--demo demo">
+        <strong>Comandă demonstrativă.</strong> Comanda apare în panoul de administrare, dar nu se face nicio plată și
+        nu se trimite niciun email. Pentru o comandă reală, sună la <a href={contact.phoneHref}>{contact.phoneDisplay}</a>.
+      </p>
+
+      <div class="cart-empty" data-empty hidden>
+        <p class="empty-title">Coșul e gol.</p>
+        <a class="btn" href="/magazin">Vezi casetele din stoc <Icon name="arrow" /></a>
+      </div>
+
+      <div class="cart-layout" data-filled hidden>
+        <div>
+          <ul class="lines" data-lines aria-label="Produse în coș"></ul>
+          <div class="totals">
+            <p><span>Total produse (TVA inclus)</span><strong class="price" data-total>0 lei</strong></p>
+            <p class="totals-note">Livrarea și eventualul montaj se stabilesc telefonic. Piesa veche se predă la schimb.</p>
+          </div>
+        </div>
+
+        <form class="checkout" data-checkout novalidate>
+          <h2>Date pentru comandă</h2>
+          <div class="field">
+            <label for="nume">Nume și prenume</label>
+            <input id="nume" name="nume" autocomplete="name" required />
+            <p class="error-text" data-error-for="nume" hidden>Scrie numele complet.</p>
+          </div>
+          <div class="field">
+            <label for="telefon">Telefon</label>
+            <input id="telefon" name="telefon" type="tel" autocomplete="tel" inputmode="tel" required />
+            <p class="error-text" data-error-for="telefon" hidden>Scrie un număr de telefon valid, de exemplu 07xx xxx xxx.</p>
+          </div>
+          <div class="field">
+            <label for="email">Email <span class="optional">(opțional)</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" />
+            <p class="error-text" data-error-for="email" hidden>Adresa de email nu pare corectă.</p>
+          </div>
+          <fieldset class="choice">
+            <legend>Cum primești caseta?</legend>
+            <label><input type="radio" name="livrare" value="atelier" checked /> Montaj sau ridicare din atelier, București</label>
+            <label><input type="radio" name="livrare" value="curier" /> Livrare prin curier</label>
+          </fieldset>
+          <div class="field" data-address hidden>
+            <label for="adresa">Adresă de livrare</label>
+            <textarea id="adresa" name="adresa" autocomplete="street-address" rows="3"></textarea>
+            <p class="error-text" data-error-for="adresa" hidden>Scrie adresa completă pentru curier.</p>
+          </div>
+          <div class="field">
+            <label for="masina">Mașina <span class="optional">(opțional)</span></label>
+            <input id="masina" name="masina" placeholder="Marcă, model, an, serie șasiu" />
+            <p class="hint">Ne ajută să verificăm compatibilitatea înainte de livrare.</p>
+          </div>
+          <label class="consent">
+            <input type="checkbox" name="acord" required />
+            <span>Sunt de acord cu prelucrarea datelor pentru această comandă.</span>
+          </label>
+          <p class="error-text" data-error-for="acord" hidden>Bifează acordul ca să continui.</p>
+          <p class="notice notice--error" data-server-error role="alert" hidden></p>
+          <button class="btn btn--call submit" type="submit" data-submit>Trimite comanda (demo)</button>
+        </form>
+      </div>
+
+      <div class="done" data-done hidden tabindex="-1">
+        <p class="sign done-sign">Comandă demo</p>
+        <h2>Mulțumim! Comanda <span data-order-id></span> a fost înregistrată.</h2>
+        <p>
+          Aceasta e o demonstrație: comanda apare doar în panoul de administrare, fără plată. Pe site-ul real, un coleg
+          te-ar suna pentru confirmare. Pentru o comandă adevărată, sună la <a href={contact.phoneHref}>{contact.phoneDisplay}</a>.
+        </p>
+        <a class="btn btn--ghost" href="/magazin">Înapoi la magazin</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { formatPrice, readCart, writeCart, type CartItem } from '../scripts/cart';
+
+  const lines = document.querySelector<HTMLUListElement>('[data-lines]')!;
+  const total = document.querySelector<HTMLElement>('[data-total]')!;
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const filled = document.querySelector<HTMLElement>('[data-filled]')!;
+  const done = document.querySelector<HTMLElement>('[data-done]')!;
+  const form = document.querySelector<HTMLFormElement>('[data-checkout]')!;
+  const address = document.querySelector<HTMLElement>('[data-address]')!;
+
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]> = {}, ...children: (Node | string)[]) => {
+    const node = Object.assign(document.createElement(tag), props);
+    node.append(...children);
+    return node;
+  };
+
+  const setQty = (id: string, qty: number) => {
+    const items = readCart()
+      .map((i) => (i.id === id ? { ...i, qty } : i))
+      .filter((i) => i.qty > 0);
+    writeCart(items);
+    render();
+  };
+
+  function line(item: CartItem) {
+    const minus = el('button', { type: 'button', className: 'qty-btn', ariaLabel: `Scade cantitatea pentru ${item.name}` }, '−');
+    const plus = el('button', { type: 'button', className: 'qty-btn', ariaLabel: `Crește cantitatea pentru ${item.name}` }, '+');
+    const remove = el('button', { type: 'button', className: 'remove' }, 'Elimină');
+    minus.addEventListener('click', () => setQty(item.id, item.qty - 1));
+    plus.addEventListener('click', () => setQty(item.id, Math.min(item.qty + 1, 10)));
+    remove.addEventListener('click', () => setQty(item.id, 0));
+    const img = el('img', { src: item.image, alt: '', width: 120, height: 80 });
+    return el(
+      'li',
+      { className: 'line' },
+      img,
+      el('div', { className: 'line-main' },
+        el('a', { href: `/magazin/${item.id}`, className: 'line-name' }, item.name),
+        el('p', { className: 'line-unit' }, `${formatPrice(item.price)} / bucată`),
+      ),
+      el('div', { className: 'qty' }, minus, el('span', { ariaLabel: 'Cantitate' }, String(item.qty)), plus),
+      el('p', { className: 'price line-total' }, formatPrice(item.price * item.qty)),
+      remove,
+    );
+  }
+
+  function render() {
+    const items = readCart();
+    lines.replaceChildren(...items.map(line));
+    total.textContent = formatPrice(items.reduce((s, i) => s + i.price * i.qty, 0));
+    empty.hidden = items.length > 0 || !done.hidden;
+    filled.hidden = items.length === 0;
+  }
+
+  form.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement;
+    if (target.name === 'livrare') address.hidden = target.value !== 'curier';
+  });
+
+  const showError = (name: string, show: boolean) => {
+    const msg = form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+    const input = form.elements.namedItem(name) as HTMLInputElement | null;
+    if (msg) msg.hidden = !show;
+    if (input && 'setAttribute' in input) {
+      input.setAttribute('aria-invalid', String(show));
+      if (msg) {
+        msg.id = `err-${name}`;
+        if (show) input.setAttribute('aria-describedby', msg.id);
+        else input.removeAttribute('aria-describedby');
+      }
+    }
+    return show;
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const phone = String(data.get('telefon') || '').replace(/[\s.-]/g, '');
+    const email = String(data.get('email') || '').trim();
+    const errors = [
+      showError('nume', String(data.get('nume') || '').trim().length < 3),
+      showError('telefon', !/^(\+?40|0)\d{9}$/.test(phone)),
+      showError('email', email !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)),
+      showError('adresa', data.get('livrare') === 'curier' && String(data.get('adresa') || '').trim().length < 8),
+      showError('acord', !data.get('acord')),
+    ];
+    const firstInvalid = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+    if (errors.some(Boolean)) {
+      firstInvalid?.focus();
+      return;
+    }
+    const serverError = form.querySelector<HTMLElement>('[data-server-error]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    serverError.hidden = true;
+    submit.disabled = true;
+    submit.textContent = 'Se trimite…';
+    try {
+      const res = await fetch('/api/comanda', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...Object.fromEntries(data),
+          acord: Boolean(data.get('acord')),
+          items: readCart().map((i) => ({ id: i.id, qty: i.qty })),
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Comanda nu a putut fi înregistrată.');
+      document.querySelector('[data-order-id]')!.textContent = `#${result.id}`;
+      writeCart([]);
+      filled.hidden = true;
+      empty.hidden = true;
+      done.hidden = false;
+      done.focus();
+    } catch (err) {
+      serverError.textContent = `${(err as Error).message} Încearcă din nou sau sună-ne.`;
+      serverError.hidden = false;
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Trimite comanda (demo)';
+    }
+  });
+
+  render();
+</script>
+
+<style>
+  h1 {
+    font-size: var(--step-5);
+    font-stretch: 118%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .demo {
+    margin: 1.5rem 0 2.5rem;
+    max-width: 70ch;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  .cart-empty {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    padding: 2.5rem;
+    border: 2px dashed var(--line);
+    background: var(--paper);
+  }
+
+  .empty-title {
+    font-size: var(--step-2);
+    font-weight: 760;
+    font-stretch: 112%;
+  }
+
+  .cart-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+  }
+
+  .lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .lines :global(.line) {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) auto auto;
+    grid-template-areas: 'img main qty total' 'img main remove remove';
+    gap: 0.4rem 1.25rem;
+    align-items: center;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lines :global(img) {
+    grid-area: img;
+    width: 96px;
+    height: 64px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--line);
+  }
+
+  .lines :global(.line-main) {
+    grid-area: main;
+  }
+
+  .lines :global(.line-name) {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .lines :global(.line-name:hover) {
+    text-decoration: underline;
+  }
+
+  .lines :global(.line-unit) {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .lines :global(.qty) {
+    grid-area: qty;
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .lines :global(.qty span) {
+    min-width: 2rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .lines :global(.qty-btn) {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .lines :global(.qty-btn:hover) {
+    background: var(--floor-deep);
+  }
+
+  .lines :global(.line-total) {
+    grid-area: total;
+    text-align: right;
+    min-width: 6.5rem;
+  }
+
+  .lines :global(.remove) {
+    grid-area: remove;
+    justify-self: end;
+    min-height: 44px;
+    padding: 0 0.25rem;
+    border: 0;
+    background: none;
+    color: var(--red);
+    font: inherit;
+    font-size: var(--step--1);
+    font-weight: 650;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .totals {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .totals p:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-weight: 650;
+  }
+
+  .totals .price {
+    font-size: var(--step-3);
+  }
+
+  .totals-note {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .checkout {
+    display: grid;
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-top: var(--lane-w) solid var(--lane);
+  }
+
+  .checkout h2 {
+    font-size: var(--step-2);
+  }
+
+  .optional {
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  .choice {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .choice legend {
+    font-weight: 650;
+    margin-bottom: 0.4rem;
+  }
+
+  .choice label,
+  .consent {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    min-height: 44px;
+    padding-top: 0.6rem;
+    cursor: pointer;
+  }
+
+  .choice input,
+  .consent input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.15rem;
+    flex: none;
+  }
+
+  .submit {
+    width: 100%;
+  }
+
+  .done {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    max-width: 62ch;
+    padding: 2rem;
+    background: var(--paper);
+    border-top: var(--lane-w) solid var(--lane);
+  }
+
+  .done:focus {
+    outline: none;
+  }
+
+  .done-sign {
+    font-size: var(--step-0);
+    color: var(--teal-ink);
+  }
+
+  .done h2 {
+    font-size: var(--step-3);
+  }
+
+  @media (max-width: 900px) {
+    .cart-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .lines :global(.line) {
+      grid-template-columns: 72px minmax(0, 1fr);
+      grid-template-areas: 'img main' 'qty total' 'remove remove';
+    }
+
+    .lines :global(img) {
+      width: 72px;
+      height: 48px;
+    }
+  }
+</style>

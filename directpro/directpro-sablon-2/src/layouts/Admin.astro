@@ -1,0 +1,114 @@
+---
+import '@fontsource-variable/onest';
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+
+interface Props {
+  title: string;
+  signedIn?: boolean;
+}
+const { title, signedIn = true } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title} · Admin DIRECTPRO</title>
+  </head>
+  <body class="admin">
+    <a class="skip" href="#continut">Sari la conținut</a>
+    <header class="admin-bar">
+      <a class="admin-brand" href="/admin"><span class="mark"><Logo size={26} /></span><span class="sign">DIRECTPRO</span><span class="tag">Admin demo</span></a>
+      {signedIn && (
+        <nav class="admin-nav" aria-label="Admin">
+          <a href="/admin" aria-current={path === '/admin' ? 'page' : undefined}>Statistici</a>
+          <a href="/admin/produse" aria-current={path.startsWith('/admin/produs') ? 'page' : undefined}>Produse</a>
+          <a href="/admin/produs/nou">Adaugă produs</a>
+          <a href="/magazin" target="_blank" rel="noopener">Vezi magazinul</a>
+          <form method="post" action="/admin/logout"><button type="submit">Ieși din cont</button></form>
+        </nav>
+      )}
+    </header>
+    <main id="continut" class="admin-main">
+      <slot />
+    </main>
+    <style>
+      .admin-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem var(--gutter);
+        background: var(--ink);
+        color: #fff;
+        border-bottom: var(--lane-w) solid var(--lane);
+      }
+
+      .admin-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-height: 44px;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .mark {
+        color: var(--lane);
+        display: grid;
+      }
+
+      .tag {
+        padding: 0.2rem 0.5rem;
+        border: 1px solid #5a6f8c;
+        border-radius: var(--radius);
+        font-size: var(--step--1);
+        font-weight: 600;
+        color: #c8d3e2;
+      }
+
+      .admin-nav {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .admin-nav a,
+      .admin-nav button {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 0.8rem;
+        border: 0;
+        border-radius: var(--radius);
+        background: none;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .admin-nav a[aria-current] {
+        box-shadow: inset 0 -3px 0 var(--lane);
+      }
+
+      .admin-nav a:hover,
+      .admin-nav button:hover {
+        background: #1d3b63;
+      }
+
+      .admin-main {
+        max-width: 1240px;
+        margin-inline: auto;
+        padding: clamp(1.5rem, 4vw, 3rem) var(--gutter) 4rem;
+      }
+    </style>
+  </body>
+</html>

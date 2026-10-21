@@ -1,0 +1,252 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import ProductUnit from '../../components/ProductUnit.astro';
+import { contact } from '../../data/site';
+import { brandOf, brands, getProducts } from '../../lib/products';
+
+export const prerender = false;
+
+const all = await getProducts();
+const brandList = brands(all);
+const brand = Astro.url.searchParams.get('marca') ?? '';
+const sort = Astro.url.searchParams.get('ordine') ?? '';
+const query = (Astro.url.searchParams.get('cauta') ?? '').trim();
+
+const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+let products = all.filter((p) => (!brand || brandOf(p.name) === brand) && (!query || normalize(p.name).includes(normalize(query))));
+if (sort === 'pret-crescator') products = [...products].sort((a, b) => a.price - b.price);
+if (sort === 'pret-descrescator') products = [...products].sort((a, b) => b.price - a.price);
+
+const link = (marca: string) => {
+  const params = new URLSearchParams();
+  if (marca) params.set('marca', marca);
+  if (sort) params.set('ordine', sort);
+  if (query) params.set('cauta', query);
+  const qs = params.toString();
+  return qs ? `/magazin?${qs}` : '/magazin';
+};
+---
+<Base title="Magazin casete de direcție recondiționate" description="Casete de direcție recondiționate din stoc, cu garanție 12 luni și piesa veche la schimb. Prețurile includ TVA. DIRECTPRO, București.">
+  <section class="section shop" aria-labelledby="shop-title">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <div class="shop-head">
+        <div>
+          <h1 id="shop-title">Casete recondiționate</h1>
+          <p class="lede measure">
+            Din stoc, pentru {brandList.length} mărci. Nu știi sigur ce casetă are mașina ta? Sună la{' '}
+            <a href={contact.phoneHref}>{contact.phoneDisplay}</a> și verificăm compatibilitatea.
+          </p>
+        </div>
+        <ul class="terms">
+          <li><Icon name="check" />Garanție 12 luni</li>
+          <li><Icon name="swap" />Piesa veche la schimb</li>
+          <li><Icon name="truck" />Livrare rapidă din stoc</li>
+          <li><Icon name="check" />Prețurile includ TVA</li>
+        </ul>
+      </div>
+
+      <p class="notice notice--demo demo-note">
+        <strong>Magazin demonstrativ.</strong> Poți adăuga produse în coș și trimite comanda: ea apare doar în panoul de
+        administrare. Nu se face nicio plată și nu se trimite niciun email.
+      </p>
+
+      <div class="filters">
+        <nav class="brand-chips" aria-label="Filtrează după marcă">
+          <a href={link('')} aria-current={!brand ? 'true' : undefined}>Toate</a>
+          {brandList.map((b) => <a href={link(b)} aria-current={brand === b ? 'true' : undefined}>{b}</a>)}
+        </nav>
+        <form class="tools" method="get" action="/magazin" role="search">
+          {brand && <input type="hidden" name="marca" value={brand} />}
+          <div class="field">
+            <label for="cauta">Caută model</label>
+            <input id="cauta" name="cauta" type="search" value={query} placeholder="ex. Golf, Duster, Transit" />
+          </div>
+          <div class="field">
+            <label for="ordine">Ordine</label>
+            <select id="ordine" name="ordine">
+              <option value="" selected={!sort}>Alfabetic</option>
+              <option value="pret-crescator" selected={sort === 'pret-crescator'}>Preț crescător</option>
+              <option value="pret-descrescator" selected={sort === 'pret-descrescator'}>Preț descrescător</option>
+            </select>
+          </div>
+          <button class="btn" type="submit">Aplică</button>
+        </form>
+      </div>
+
+      <p class="count" role="status">
+        {products.length === 1 ? '1 casetă' : `${products.length} casete`}
+        {brand && ` ${brand}`}{query && ` pentru „${query}”`}
+      </p>
+
+      {products.length > 0 ? (
+        <div class="grid">
+          {products.map((p) => <ProductUnit product={p} headingLevel="h2" />)}
+        </div>
+      ) : (
+        <div class="empty">
+          <p class="empty-title">Nu am găsit casete pentru căutarea ta.</p>
+          <p>Sună la <a href={contact.phoneHref}>{contact.phoneDisplay}</a> și te ajutăm să găsești caseta potrivită, sau <a href="/magazin">vezi toate casetele</a>.</p>
+        </div>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .shop-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 2rem 4rem;
+    align-items: end;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    font-stretch: 118%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+  }
+
+  .lede {
+    margin-top: 1.25rem;
+  }
+
+  .terms {
+    list-style: none;
+    margin: 0;
+    padding: 1.25rem 1.4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.25rem;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 650;
+    border-top: var(--lane-w) solid var(--lane);
+  }
+
+  .terms li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .terms :global(svg) {
+    flex: none;
+    color: var(--lane);
+  }
+
+  .demo-note {
+    margin-top: 2rem;
+  }
+
+  .filters {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .brand-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .brand-chips a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 650;
+    text-decoration: none;
+    transition: border-color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+  }
+
+  .brand-chips a:hover {
+    border-color: var(--ink);
+  }
+
+  .brand-chips a[aria-current] {
+    background: var(--lane);
+    border-color: var(--lane);
+  }
+
+  .tools {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .count {
+    margin: 1.75rem 0 1rem;
+    font-weight: 650;
+    color: var(--ink-soft);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+
+  .empty {
+    padding: 2.5rem;
+    background: var(--paper);
+    border: 2px dashed var(--line);
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .empty-title {
+    font-size: var(--step-1);
+    font-weight: 700;
+  }
+
+  @media (max-width: 860px) {
+    .shop-head {
+      grid-template-columns: 1fr;
+    }
+
+    .tools {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .tools .field:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .terms {
+      grid-template-columns: 1fr;
+    }
+
+    .brand-chips {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+    }
+
+    .brand-chips a {
+      flex: none;
+    }
+  }
+</style>

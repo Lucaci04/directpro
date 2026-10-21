@@ -1,0 +1,352 @@
+[
+  {
+    "id": "caseta-directie-audi-a3",
+    "sku": "DPC018",
+    "name": "Casetă direcție Audi A3",
+    "price": 1300,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-audi-a3.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-audi-a4-b8",
+    "sku": "DPCVW03",
+    "name": "Casetă direcție Audi A4 B8",
+    "price": 3600,
+    "regularPrice": 4000,
+    "image": "/produse/caseta-directie-audi-a4-b8.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-audi-a4-b9",
+    "sku": "DPC007",
+    "name": "Casetă direcție Audi A4 B9",
+    "price": 2200,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-audi-a4-b9.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-audi-a5",
+    "sku": "DPC008",
+    "name": "Casetă direcție Audi A5",
+    "price": 3600,
+    "regularPrice": 4000,
+    "image": "/produse/caseta-directie-audi-a5.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-audi-a6-c7",
+    "sku": "DPC023",
+    "name": "Casetă direcție Audi A6 C7",
+    "price": 3600,
+    "regularPrice": 4000,
+    "image": "/produse/caseta-directie-audi-a6-c7.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-audi-a7",
+    "sku": "DPC024",
+    "name": "Casetă direcție Audi A7",
+    "price": 3600,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-audi-a7.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-audi-q5-ii",
+    "sku": "DPC004",
+    "name": "Casetă direcție Audi Q5 II",
+    "price": 5100,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-audi-q5-ii.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-bmw-seria-3-e46",
+    "sku": "DPC026",
+    "name": "Casetă direcție BMW Seria 3 E46",
+    "price": 900,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-bmw-seria-3-e46.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-bmw-seria-3-e90",
+    "sku": "DPC013",
+    "name": "Casetă direcție BMW Seria 3 E90",
+    "price": 2050,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-bmw-seria-3-e90.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-bmw-seria-5-e60",
+    "sku": "DPC027",
+    "name": "Casetă direcție BMW Seria 5 E60",
+    "price": 1250,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-bmw-seria-5-e60.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-citroen-jumper",
+    "sku": "DPC010",
+    "name": "Casetă direcție Citroen Jumper",
+    "price": 1200,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-citroen-jumper.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-dacia-duster",
+    "sku": "DPC033",
+    "name": "Casetă direcție Dacia Duster",
+    "price": 1050,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-dacia-duster.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-electrica-ford-focus-3",
+    "sku": "DPC011",
+    "name": "Casetă direcție electrică Ford Focus 3",
+    "price": 2550,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-electrica-ford-focus-3.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-fiat-doblo",
+    "sku": "DPC035",
+    "name": "Casetă direcție Fiat Doblo",
+    "price": 950,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-fiat-doblo.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-fiat-ducato",
+    "sku": "DPC009",
+    "name": "Casetă direcție Fiat Ducato",
+    "price": 1200,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-fiat-ducato.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-ford-fiesta-2",
+    "sku": "DPC029",
+    "name": "Casetă direcție Ford Fiesta 2",
+    "price": 700,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-ford-fiesta-2.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-ford-focus-1",
+    "sku": "DPC005",
+    "name": "Casetă direcție Ford Focus 1",
+    "price": 800,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-ford-focus-1.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-ford-transit",
+    "sku": "DPC032",
+    "name": "Casetă direcție Ford Transit",
+    "price": 1200,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-ford-transit.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-hidraulica-dacia-logan",
+    "sku": "DPC034",
+    "name": "Casetă direcție hidraulică Dacia Logan",
+    "price": 800,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-hidraulica-dacia-logan.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-mercedes-benz-c-class-w204",
+    "sku": "DPC028",
+    "name": "Casetă direcție Mercedes-Benz C-Class W204",
+    "price": 1250,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-mercedes-benz-c-class-w204.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-mercedes-benz-sprinter",
+    "sku": "DPC014",
+    "name": "Casetă direcție Mercedes-Benz Sprinter",
+    "price": 1400,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-mercedes-benz-sprinter.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-opel-astra-h",
+    "sku": "DPC030",
+    "name": "Casetă direcție Opel Astra H",
+    "price": 900,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-opel-astra-h.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-opel-zafira-b",
+    "sku": "DPC031",
+    "name": "Casetă direcție Opel Zafira B",
+    "price": 900,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-opel-zafira-b.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-renault-clio",
+    "sku": "DPC025",
+    "name": "Casetă direcție Renault Clio",
+    "price": 750,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-renault-clio.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-seat-leon",
+    "sku": "DPCVW02",
+    "name": "Casetă direcție Seat Leon",
+    "price": 800,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-seat-leon.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-seat-leon-3",
+    "sku": "DPC022",
+    "name": "Casetă direcție Seat Leon 3",
+    "price": 1550,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-seat-leon-3.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-skoda-octavia-2",
+    "sku": "DPC017",
+    "name": "Casetă direcție Skoda Octavia 2",
+    "price": 1300,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-skoda-octavia-2.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-skoda-octavia-3",
+    "sku": "DPC021",
+    "name": "Casetă direcție Skoda Octavia 3",
+    "price": 1550,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-skoda-octavia-3.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-volkswagen-crafter-2006-2018",
+    "sku": "DPC015",
+    "name": "Casetă direcție Volkswagen Crafter 2006-2018",
+    "price": 1400,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-volkswagen-crafter-2006-2018.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-volkswagen-golf-5",
+    "sku": "DPC016",
+    "name": "Casetă direcție Volkswagen Golf 5",
+    "price": 1300,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-volkswagen-golf-5.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-volkswagen-passat-cc",
+    "sku": "DPC006",
+    "name": "Casetă direcție Volkswagen Passat CC",
+    "price": 2550,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-volkswagen-passat-cc.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-volkswagen-touareg",
+    "sku": "DPC012",
+    "name": "Casetă direcție Volkswagen Touareg",
+    "price": 1250,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-volkswagen-touareg.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-vw-golf-4",
+    "sku": "DPCVW01",
+    "name": "Casetă direcție VW Golf 4",
+    "price": 800,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-vw-golf-4.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-vw-golf-7",
+    "sku": "DPC020",
+    "name": "Casetă direcție VW Golf 7",
+    "price": 1550,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-vw-golf-7.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  },
+  {
+    "id": "caseta-directie-vw-t5-transporter-caravelle",
+    "sku": "DPC019",
+    "name": "Casetă direcție VW T5 Transporter, Caravelle",
+    "price": 1100,
+    "regularPrice": null,
+    "image": "/produse/caseta-directie-vw-t5-transporter-caravelle.webp",
+    "inStock": true,
+    "source": "https://directpro.example/"
+  }
+]

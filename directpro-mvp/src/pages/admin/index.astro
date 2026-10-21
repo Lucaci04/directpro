@@ -1,0 +1,190 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { deleteProduct, formatPrice, getProducts } from '../../lib/products';
+
+export const prerender = false;
+
+if (Astro.request.method === 'POST') {
+  const data = await Astro.request.formData();
+  if (data.get('action') === 'delete') {
+    const ok = await deleteProduct(String(data.get('id') ?? ''));
+    return Astro.redirect(`/admin?mesaj=${ok ? 'sters' : 'lipsa'}`, 303);
+  }
+}
+
+const products = await getProducts();
+const messages: Record<string, string> = {
+  adaugat: 'Produsul a fost adăugat.',
+  salvat: 'Modificările au fost salvate.',
+  sters: 'Produsul a fost șters.',
+  lipsa: 'Produsul nu mai există.',
+};
+const message = messages[Astro.url.searchParams.get('mesaj') ?? ''];
+const highlight = Astro.url.searchParams.get('id');
+---
+<Admin title="Produse">
+  <div class="head">
+    <div>
+      <h1>Produse</h1>
+      <p class="sub">{products.length} produse în magazin. Modificările apar imediat pe site.</p>
+    </div>
+    <a class="btn btn--call" href="/admin/produs/nou">Adaugă produs</a>
+  </div>
+
+  {message && <p class="notice flash" role="status">{message}</p>}
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col"><span class="visually-hidden">Imagine</span></th>
+          <th scope="col">Produs</th>
+          <th scope="col" class="num">Preț</th>
+          <th scope="col">Stoc</th>
+          <th scope="col"><span class="visually-hidden">Acțiuni</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {products.map((p) => (
+          <tr class:list={{ hl: p.id === highlight }}>
+            <td><img src={p.image} alt="" width="72" height="48" loading="lazy" /></td>
+            <td>
+              <a class="pname" href={`/magazin/${p.id}`} target="_blank" rel="noopener">{p.name}</a>
+              {p.sku && <span class="sku">{p.sku}</span>}
+            </td>
+            <td class="num price">
+              {p.regularPrice && <del>{formatPrice(p.regularPrice)}</del>}
+              {formatPrice(p.price)}
+            </td>
+            <td>{p.inStock ? 'Da' : <span class="out">Nu</span>}</td>
+            <td class="row-actions">
+              <a class="btn btn--ghost small" href={`/admin/produs/${p.id}`}>Editează<span class="visually-hidden"> {p.name}</span></a>
+              <form method="post" data-confirm={`Ștergi „${p.name}”? Acțiunea nu poate fi anulată.`}>
+                <input type="hidden" name="action" value="delete" />
+                <input type="hidden" name="id" value={p.id} />
+                <button class="btn small danger" type="submit">Șterge<span class="visually-hidden"> {p.name}</span></button>
+              </form>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Admin>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-confirm]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      if (!confirm(form.dataset.confirm!)) e.preventDefault();
+    });
+  });
+</script>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+  }
+
+  .sub {
+    margin-top: 0.4rem;
+    color: var(--ink-soft);
+  }
+
+  .flash {
+    margin-bottom: 1.25rem;
+    border-color: var(--teal-ink);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--paper);
+    border: 1px solid var(--line);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+
+  th,
+  td {
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  th {
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    background: var(--floor);
+  }
+
+  .num {
+    text-align: right;
+  }
+
+  td img {
+    width: 72px;
+    height: 48px;
+    object-fit: contain;
+    background: #fff;
+  }
+
+  .pname {
+    color: var(--ink);
+    font-weight: 650;
+  }
+
+  .sku {
+    display: block;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .out {
+    color: var(--red);
+    font-weight: 650;
+  }
+
+  tr.hl td {
+    background: #fff6d6;
+  }
+
+  .row-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .row-actions form {
+    margin: 0;
+  }
+
+  .small {
+    min-height: 44px;
+    padding: 0.4rem 0.8rem;
+    font-size: var(--step--1);
+  }
+
+  .danger {
+    --btn-bg: var(--red);
+    --btn-fg: #fff;
+  }
+
+  .danger:hover {
+    --btn-bg: #9b2a20;
+  }
+</style>

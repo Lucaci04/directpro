@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { contact } from '../data/site';
+---
+<Base title="Pagina nu există" description="Pagina căutată nu există." noindex>
+  <section class="section nf">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <p class="sign code">404</p>
+      <h1>Aici linia se oprește.</h1>
+      <p class="lede measure">Pagina pe care o cauți nu există sau a fost mutată.</p>
+      <div class="actions">
+        <a class="btn" href="/">Înapoi la început <Icon name="arrow" /></a>
+        <a class="btn btn--ghost" href={contact.phoneHref}><Icon name="phone" />{contact.phoneDisplay}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .code {
+    display: inline-block;
+    padding: 0.4rem 0.6rem;
+    background: var(--lane);
+    font-size: var(--step-2);
+  }
+
+  h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-5);
+    font-stretch: 118%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .lede {
+    margin-top: 1rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+</style>

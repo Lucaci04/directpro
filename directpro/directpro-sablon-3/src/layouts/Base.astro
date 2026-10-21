@@ -1,0 +1,545 @@
+---
+import '@fontsource-variable/figtree';
+import '@fontsource-variable/big-shoulders-display';
+import displayLatin from '@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-wght-normal.woff2?url';
+import displayLatinExt from '@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-ext-wght-normal.woff2?url';
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import Logo from '../components/Logo.astro';
+import { contact, services } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  lane?: boolean;
+  noindex?: boolean;
+}
+const { title, description, lane = true, noindex = false } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const nav = [
+  { href: '/servicii', label: 'Servicii' },
+  { href: '/magazin', label: 'Magazin' },
+  { href: '/despre', label: 'Despre noi' },
+  { href: '/contact', label: 'Contact' },
+];
+const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
+const fullTitle = path === '/' ? title : `${title} · DIRECTPRO`;
+---
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="font" type="font/woff2" href={displayLatin} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={displayLatinExt} crossorigin />
+    <meta name="theme-color" content="#eef1f4" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="ro_RO" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip" href="#continut">Sari la conținut</a>
+
+    <header class="site-header">
+      <div class="bar">
+        <a class="brand" href="/" aria-label="DIRECTPRO, pagina principală">
+          <span class="brand-mark"><Logo size={30} /></span>
+          <span class="brand-word sign">DIRECTPRO</span>
+        </a>
+
+        <nav class="primary" aria-label="Principal">
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-list">
+            <Icon name="menu" size={22} />
+            <span>Meniu</span>
+          </button>
+          <div class="nav-panel" id="nav-list">
+            <ul>
+              {nav.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+                </li>
+              ))}
+            </ul>
+            <div class="nav-contact">
+              <a class="btn btn--call" href={contact.phoneHref}><Icon name="phone" />{contact.phoneDisplay}</a>
+              <p class="label">{contact.hours}</p>
+            </div>
+          </div>
+        </nav>
+
+        <a class="cart-link" href="/cos" aria-label="Coșul de cumpărături">
+          <Icon name="cart" size={22} />
+          <span class="cart-count" data-cart-count hidden>0</span>
+        </a>
+        <a class="btn btn--call header-call" href={contact.phoneHref}>
+          <Icon name="phone" />
+          <span>{contact.phoneDisplay}</span>
+        </a>
+      </div>
+    </header>
+
+    <main id="continut" class:list={{ 'has-lane': lane }}>
+      {lane && <div class="lane-track" aria-hidden="true"><div class="lane-paint"></div></div>}
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div class="footer-reception">
+          <a class="footer-phone" href={contact.phoneHref} aria-label={`Telefon: ${contact.phoneDisplay}`}>{contact.phoneDisplay}</a>
+          <p>{contact.hours}</p>
+          <p><a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        </div>
+        <div>
+          <h2 class="label">Adresă</h2>
+          <address>
+            {contact.street}<br />{contact.building}<br />{contact.city}
+          </address>
+          <p class="footer-links">
+            <a href={contact.mapsHref} rel="noopener" target="_blank">Google Maps</a>
+            <a href={contact.wazeHref} rel="noopener" target="_blank">Waze</a>
+          </p>
+        </div>
+        <div>
+          <h2 class="label">Servicii</h2>
+          <ul class="footer-list">
+            {services.map((s) => <li><a href={`/servicii/${s.slug}`}>{s.name}</a></li>)}
+          </ul>
+        </div>
+        <div>
+          <h2 class="label">DIRECTPRO</h2>
+          <ul class="footer-list">
+            <li><a href="/magazin">Magazin casete</a></li>
+            <li><a href="/despre">Despre noi</a></li>
+            <li><a href="/contact">Contact</a></li>
+            {contact.social.map((s) => <li><a href={s.href} rel="noopener" target="_blank">{s.label}</a></li>)}
+          </ul>
+        </div>
+      </div>
+      <div class="wrap footer-base">
+        <p>Service autorizat R.A.R. · Din 2007</p>
+        <p class="footer-demo">Versiune MVP demonstrativă · Șablon 3</p>
+      </div>
+    </footer>
+
+    <div class="call-dock" aria-label="Contact rapid">
+      <a class="btn btn--call" href={contact.phoneHref}><Icon name="phone" />Sună acum</a>
+      <a class="btn btn--ghost dock-wa" href={contact.whatsappHref} rel="noopener" target="_blank">
+        <Icon name="chat" />WhatsApp
+      </a>
+    </div>
+
+    <script>
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Statistică anonimă de vizite (fără cookie-uri, fără IP salvat).
+      if (navigator.doNotTrack !== '1' && 'sendBeacon' in navigator) {
+        navigator.sendBeacon('/api/vizita', new Blob([location.pathname], { type: 'text/plain' }));
+      }
+
+      // Meniul mobil
+      const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+      const panel = document.getElementById('nav-list');
+      toggle?.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        document.body.classList.toggle('nav-open', !open);
+        if (!open) panel?.querySelector('a')?.focus();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+          toggle.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('nav-open');
+          toggle.focus();
+        }
+      });
+
+      // Numărul de produse din coș
+      const updateCount = () => {
+        let count = 0;
+        try {
+          const cart = JSON.parse(localStorage.getItem('directpro-cart') || '[]');
+          count = cart.reduce((n: number, i: { qty: number }) => n + i.qty, 0);
+        } catch {}
+        document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach((el) => {
+          el.textContent = String(count);
+          el.hidden = count === 0;
+        });
+      };
+      updateCount();
+      window.addEventListener('cart:change', updateCount);
+      window.addEventListener('storage', updateCount);
+
+      // Linia de pe podea: se desenează până la ~60% din înălțimea ecranului.
+      const main = document.querySelector<HTMLElement>('main.has-lane');
+      if (main && !reduce) {
+        let ticking = false;
+        const draw = () => {
+          ticking = false;
+          const rect = main.getBoundingClientRect();
+          const reach = window.innerHeight * 0.62 - rect.top;
+          const p = Math.min(1, Math.max(0.02, reach / rect.height));
+          main.style.setProperty('--lane-progress', p.toFixed(4));
+        };
+        draw();
+        addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(draw); } }, { passive: true });
+        addEventListener('resize', draw);
+      }
+
+      // Opririle de pe linie se aprind, iar blocurile marcate se „vopsesc”.
+      if ('IntersectionObserver' in window) {
+        const lit = new IntersectionObserver(
+          (entries) => entries.forEach((e) => e.target.classList.toggle('is-lit', e.isIntersecting)),
+          { rootMargin: '-40% 0px -50% 0px' },
+        );
+        document.querySelectorAll('[data-stop]').forEach((el) => lit.observe(el));
+
+        const paint = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-in');
+                paint.unobserve(e.target);
+              }
+            }),
+          { rootMargin: '0px 0px -12% 0px' },
+        );
+        document.querySelectorAll('.paint-in').forEach((el) => paint.observe(el));
+      } else {
+        document.querySelectorAll('.paint-in').forEach((el) => el.classList.add('is-in'));
+      }
+    </script>
+
+    <style>
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--floor);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .bar {
+        max-width: var(--max);
+        margin-inline: auto;
+        padding: 0.7rem calc(var(--gutter) + var(--lane-x) + var(--lane-w));
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .brand:hover .brand-mark {
+        transform: rotate(-12deg) scale(1.06);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--ink);
+        text-decoration: none;
+        min-height: 44px;
+      }
+
+      .brand-mark {
+        color: var(--teal);
+        transition: transform 600ms var(--ease-out);
+        display: grid;
+      }
+
+      .brand-word {
+        white-space: nowrap;
+        font-family: var(--display);
+        font-size: 1.5rem;
+        letter-spacing: 0.04em;
+      }
+
+      .primary {
+        margin-left: auto;
+      }
+
+      .nav-panel {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .nav-panel ul {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .nav-panel ul a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 0.8rem;
+        color: var(--ink);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.82rem;
+        text-decoration: none;
+        position: relative;
+      }
+
+      .nav-panel ul a::after {
+        content: '';
+        position: absolute;
+        left: 0.8rem;
+        right: 0.8rem;
+        bottom: 6px;
+        height: 2px;
+        background: var(--teal);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 260ms var(--ease-out);
+      }
+
+      .nav-panel ul a:hover::after,
+      .nav-panel ul a[aria-current='page']::after {
+        transform: scaleX(1);
+      }
+
+      .nav-contact,
+      .nav-toggle {
+        display: none;
+      }
+
+      .cart-link {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        color: var(--ink);
+        border-radius: var(--radius);
+      }
+
+      .cart-link:hover {
+        background: var(--floor-deep);
+      }
+
+      .cart-count {
+        position: absolute;
+        top: 4px;
+        right: 2px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        border-radius: 10px;
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 20px;
+        text-align: center;
+      }
+
+      .header-call {
+        font-size: var(--step-0);
+        padding: 0.6rem 1rem;
+      }
+
+      main {
+        position: relative;
+      }
+
+      .site-footer {
+        background: var(--navy);
+        color: #dde5ef;
+        padding-block: clamp(3.5rem, 6vw, 5.5rem) 2.5rem;
+      }
+
+      .site-footer a {
+        color: #fff;
+      }
+
+      .site-footer .label {
+        color: #a9b6c8;
+        margin: 0 0 0.9rem;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1.2fr 1fr;
+        gap: 2.5rem;
+      }
+
+      .footer-phone {
+        display: inline-block;
+        white-space: nowrap;
+        font-size: var(--step-2);
+        font-stretch: 118%;
+        font-weight: 780;
+        text-decoration: none;
+        letter-spacing: -0.01em;
+        margin-bottom: 0.5rem;
+      }
+
+      address {
+        font-style: normal;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 1.2rem;
+        margin-top: 0.8rem;
+      }
+
+      .footer-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .footer-list a {
+        text-decoration: none;
+      }
+
+      .footer-list a:hover {
+        text-decoration: underline;
+      }
+
+      .footer-base {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 3.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #2a4568;
+        font-size: var(--step--1);
+        color: #a9b6c8;
+      }
+
+      .call-dock {
+        display: none;
+      }
+
+
+      @media (max-width: 860px) {
+      }
+
+      @media (max-width: 960px) {
+        .footer-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .header-call {
+          display: none;
+        }
+
+        .nav-toggle {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          min-height: 48px;
+          padding: 0 0.9rem;
+          border: 2px solid var(--ink);
+          border-radius: var(--radius);
+          background: transparent;
+          color: var(--ink);
+          font: inherit;
+          font-weight: 650;
+          cursor: pointer;
+        }
+
+        .nav-panel {
+          display: none;
+        }
+
+        :global(body.nav-open) .nav-panel {
+          display: grid;
+          position: fixed;
+          inset: 4.3rem 0 0 0;
+          align-content: start;
+          gap: 2rem;
+          padding: 1.5rem var(--gutter) 2rem;
+          background: var(--floor);
+          border-top: 1px solid var(--line);
+          overflow-y: auto;
+        }
+
+        :global(body.nav-open) .nav-panel ul {
+          flex-direction: column;
+          gap: 0;
+        }
+
+        :global(body.nav-open) .nav-panel ul a {
+          font-size: var(--step-2);
+          font-stretch: 115%;
+          font-weight: 760;
+          min-height: 60px;
+          padding: 0;
+          border-bottom: 1px solid var(--line);
+          width: 100%;
+        }
+
+        :global(body.nav-open) .nav-panel ul a::after {
+          left: 0;
+          right: auto;
+          width: 2.5rem;
+          bottom: 10px;
+        }
+
+        :global(body.nav-open) .nav-contact {
+          display: grid;
+          gap: 0.75rem;
+          justify-items: start;
+        }
+
+        .primary {
+          order: 3;
+          margin-left: 0;
+        }
+
+        .cart-link {
+          margin-left: auto;
+        }
+
+        .site-footer {
+          padding-bottom: 6.5rem;
+        }
+
+        .call-dock {
+          position: fixed;
+          z-index: 40;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: grid;
+          grid-template-columns: 1.4fr 1fr;
+          gap: 0.6rem;
+          padding: 0.6rem var(--gutter) calc(0.6rem + env(safe-area-inset-bottom));
+          background: var(--floor);
+          border-top: 1px solid var(--line);
+          box-shadow: 0 -8px 24px -12px rgb(22 48 46 / 0.25);
+        }
+
+        .call-dock .btn {
+          font-size: var(--step-0);
+          padding-inline: 0.75rem;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </body>
+</html>

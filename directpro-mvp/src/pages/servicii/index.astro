@@ -1,0 +1,126 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { contact, services } from '../../data/site';
+---
+<Base title="Servicii" description="Reparații și recondiționări casete de direcție, pompe de servodirecție, coloane de direcție, geometrie roți 3D și calibrări ADAS. DIRECTPRO, București.">
+  <section class="section idx" aria-labelledby="idx-title">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <h1 id="idx-title">Servicii</h1>
+      <p class="lede measure">
+        Fiecare serviciu are boxa lui în atelier. Dacă nu știi de unde vine problema, sună la{' '}
+        <a href={contact.phoneHref}>{contact.phoneDisplay}</a> și pornim de la diagnoză.
+      </p>
+      <ol class="rows">
+        {services.map((s) => (
+          <li class="paint-in">
+            <a class="row" href={`/servicii/${s.slug}`}>
+              <span class="row-bay sign" aria-hidden="true">{s.bay}</span>
+              <span class="row-text">
+                <span class="row-name">{s.name}</span>
+                <span class="row-short">{s.short}</span>
+              </span>
+              <Image class="row-photo" src={s.photo} alt="" widths={[320, 480]} sizes="240px" />
+              <Icon name="arrow" size={26} />
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+</Base>
+
+<style>
+  h1 {
+    font-size: var(--step-5);
+    font-stretch: 118%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .lede {
+    margin: 1.25rem 0 clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 220px auto;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .row-bay {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    background: var(--floor-deep);
+    font-size: 1.2rem;
+    transition: background-color 220ms var(--ease-out);
+  }
+
+  .row-text {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .row-name {
+    font-size: var(--step-2);
+    font-stretch: 114%;
+    font-weight: 770;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .row-short {
+    color: var(--ink-soft);
+  }
+
+  .row :global(.row-photo) {
+    width: 220px;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: var(--radius);
+    filter: grayscale(0.35);
+    transition: filter 300ms var(--ease-out);
+  }
+
+  .row > :global(svg) {
+    transition: transform 240ms var(--ease-out);
+  }
+
+  .row:hover .row-bay {
+    background: var(--lane);
+  }
+
+  .row:hover :global(.row-photo) {
+    filter: none;
+  }
+
+  .row:hover > :global(svg) {
+    transform: translateX(6px);
+  }
+
+  @media (max-width: 760px) {
+    .row {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .row :global(.row-photo) {
+      display: none;
+    }
+  }
+</style>

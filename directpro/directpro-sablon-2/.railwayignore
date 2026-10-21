@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+!.env.example
+data/orders.json
+data/messages.json
+data/visits.json
+data/uploads/*
+!data/uploads/.gitkeep
+*.log
+
+# Documentație internă: nu e servită public, dar nu are ce căuta pe server
+*.md
+public/**/SURSA.txt

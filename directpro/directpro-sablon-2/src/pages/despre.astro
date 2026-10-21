@@ -1,0 +1,223 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { contact } from '../data/site';
+import { team } from '../data/team';
+import a04 from '../assets/atelier/atelier-04.jpg';
+import a06 from '../assets/atelier/atelier-06.jpg';
+import a11 from '../assets/atelier/atelier-11.jpg';
+import a13 from '../assets/atelier/atelier-13.jpg';
+import a20 from '../assets/atelier/atelier-20.jpg';
+import a41 from '../assets/atelier/atelier-41.jpg';
+
+const gallery = [
+  { src: a06, alt: 'Mașină pe platforma de geometrie, cu echipamentul ADAS în spate' },
+  { src: a04, alt: 'Tehnician lucrând la o casetă de direcție, la banc' },
+  { src: a13, alt: 'Panoul turcoaz cu echipamente de testare' },
+  { src: a41, alt: 'Hala atelierului, cu o mașină pe platforma de geometrie' },
+  { src: a11, alt: 'Tehnician la bancul de lucru cu o casetă de direcție' },
+  { src: a20, alt: 'Tehnician la stația de diagnoză, lângă rafturile cu piese' },
+];
+---
+<Base title="Despre noi" description="DIRECTPRO repară și recondiționează casete de direcție din 2007, în service autorizat R.A.R. din București. Echipa și atelierul.">
+  <section class="section about" aria-labelledby="about-title">
+    <span class="stop is-lit" data-stop aria-hidden="true"></span>
+    <div class="wrap about-grid">
+      <div>
+        <h1 id="about-title">Din 2007, în același meșteșug</h1>
+      </div>
+      <div class="about-copy">
+        <p class="lede">
+          DIRECTPRO repară și recondiționează casete de direcție din 2007, pentru autoturisme și camioane, pentru
+          persoane fizice și juridice.
+        </p>
+        <p>
+          Lucrăm într-o unitate service autorizată R.A.R., cu personal calificat. Am investit constant în oameni și în
+          echipamente: bancuri de probă și diagnoză pentru o gamă largă de autovehicule.
+        </p>
+        <ul class="about-facts">
+          <li><Icon name="shield" /><span>Service autorizat R.A.R.</span></li>
+          <li><Icon name="wrench" /><span>Casete mecanice, hidraulice și electrice</span></li>
+          <li><Icon name="truck" /><span>Livrare la nivel național</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-band" aria-label="Imagini din atelier">
+    <ul class="gallery">
+      {gallery.map((g, i) => (
+        <li class:list={['g', `g${i}`]}>
+          <Image src={g.src} alt={g.alt} widths={[480, 800]} sizes="(max-width: 860px) 50vw, 33vw" />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="team-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <h2 id="team-title" class="team-title">Echipa</h2>
+      <ul class="team">
+        {team.map((m) => (
+          <li>
+            <Image src={m.photo} alt="" widths={[240, 400]} sizes="(max-width: 560px) 45vw, 200px" />
+            <p class="name">{m.name}</p>
+            <p class="role">{m.role}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section closing" aria-label="Contact">
+    <div class="wrap closing-inner">
+      <p class="closing-text">Vino să ne cunoști. Te așteptăm în {contact.building}.</p>
+      <a class="btn btn--call" href={contact.phoneHref}><Icon name="phone" />{contact.phoneDisplay}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem clamp(2rem, 6vw, 6rem);
+    align-items: start;
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    font-stretch: 118%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+  }
+
+  .about-copy {
+    display: grid;
+    gap: 1.1rem;
+    max-width: 58ch;
+  }
+
+  .about-copy p:not(.lede) {
+    color: var(--ink-soft);
+  }
+
+  .about-facts {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 1.1rem 0 0;
+    border-top: 2px solid var(--ink);
+    display: grid;
+    gap: 0.6rem;
+    font-weight: 650;
+  }
+
+  .about-facts li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .about-facts :global(svg) {
+    color: var(--teal-ink);
+    flex: none;
+  }
+
+  .gallery {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: clamp(140px, 17vw, 260px);
+    gap: 6px;
+    background: var(--lane);
+    padding-block: 6px;
+  }
+
+  .g :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .g0 { grid-column: span 3; grid-row: span 2; }
+  .g1 { grid-column: span 3; }
+  .g2 { grid-column: span 3; }
+  .g3 { grid-column: span 2; }
+  .g4 { grid-column: span 2; }
+  .g5 { grid-column: span 2; }
+
+  .team-title {
+    font-size: var(--step-4);
+    margin-bottom: 2rem;
+  }
+
+  .team {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr));
+    gap: 1.75rem 1.25rem;
+  }
+
+  .team :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: top;
+    border-radius: var(--radius);
+    background: #12286b;
+  }
+
+  .name {
+    margin-top: 0.7rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .role {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .closing {
+    background: var(--paper);
+  }
+
+  .closing-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .closing-text {
+    font-size: var(--step-3);
+    font-stretch: 115%;
+    font-weight: 780;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    max-width: 22ch;
+  }
+
+  @media (max-width: 860px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .gallery {
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: 38vw;
+    }
+
+    .g0 { grid-column: span 2; grid-row: span 1; }
+    .g1, .g2, .g3, .g4, .g5 { grid-column: span 1; }
+    .g5 { display: none; }
+  }
+</style>

@@ -1,0 +1,1058 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ProductUnit from '../components/ProductUnit.astro';
+import { contact, hallPhoto, services, symptoms, testimonials, workflow } from '../data/site';
+import { team } from '../data/team';
+import { getProducts } from '../lib/products';
+import birou from '../assets/atelier/birou.jpg';
+
+export const prerender = false;
+
+const products = await getProducts();
+// Câteva modele cerute des, din mărci diferite; restul sunt în magazin.
+const preferred = ['caseta-directie-dacia-duster', 'caseta-directie-vw-golf-7', 'caseta-directie-ford-transit', 'caseta-directie-bmw-seria-3-e46'];
+const featured = [
+  ...preferred.map((id) => products.find((p) => p.id === id)).filter((p) => p !== undefined),
+  ...products,
+]
+  .filter((p, i, all) => all.indexOf(p) === i && p.inStock)
+  .slice(0, 4);
+const serviceBySlug = Object.fromEntries(services.map((s) => [s.slug, s]));
+---
+<Base
+  title="DIRECTPRO · Reparații și recondiționări casete de direcție, București"
+  description="Atelier autorizat R.A.R. din București: reparații și recondiționări casete de direcție, pompe de servodirecție, coloane, geometrie 3D și calibrări ADAS, din 2007. Sună la 0300 000 301."
+>
+  <!-- Intrarea în hală -->
+  <section class="hero" aria-labelledby="hero-title">
+    <span class="stop is-lit hero-stop" data-stop aria-hidden="true"></span>
+    <div class="hero-inner">
+      <h1 id="hero-title">Casete de direcție reparate și recondiționate din 2007</h1>
+      <div class="hero-copy">
+        <p class="lede">
+          Atelier autorizat R.A.R. în București. Diagnosticăm, reparăm și testăm pe banc casete de direcție și pompe de
+          servodirecție, pentru orice marcă.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn--call hero-call" href={contact.phoneHref}>
+            <Icon name="phone" />
+            <span>Sună: {contact.phoneDisplay}</span>
+          </a>
+          <a class="btn btn--ghost" href={contact.whatsappHref} rel="noopener" target="_blank">
+            <Icon name="chat" />WhatsApp
+          </a>
+        </div>
+        <p class="hero-hours"><Icon name="clock" size={18} /> {contact.hours}</p>
+        <nav class="hero-symptoms" aria-label="Ce simți la volan?">
+          <p>Ce simți la volan?</p>
+          <ul>
+            {symptoms.map((s, i) => <li><a href={`#simptom-${i + 1}`}>{s.label}</a></li>)}
+          </ul>
+        </nav>
+      </div>
+      <figure class="hero-photo">
+        <Image src={hallPhoto} alt="Hala atelierului DIRECTPRO, cu mașini pe elevatoare și marcaje galbene pe podea" widths={[640, 1024]} sizes="(max-width: 860px) 100vw, 60vw" loading="eager" fetchpriority="high" />
+      </figure>
+    </div>
+    <ul class="floor-facts" aria-label="Pe scurt">
+      <li><Icon name="shield" /><span><strong>Autorizat R.A.R.</strong> service auto</span></li>
+      <li><Icon name="wrench" /><span><strong>Din 2007</strong> reparăm casete</span></li>
+      <li><Icon name="check" /><span><strong>12 luni garanție</strong> la casetele recondiționate</span></li>
+      <li><Icon name="swap" /><span><strong>Piesa veche</strong> la schimb</span></li>
+    </ul>
+  </section>
+
+  <!-- Ce simți la volan -->
+  <section class="section symptoms" aria-labelledby="simptome-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="simptome-title">Ce simți la volan?</h2>
+        <p class="lede measure">Alege simptomul. Îți arătăm boxa din atelier care se ocupă de el.</p>
+      </div>
+      <ol class="symptom-list">
+        {symptoms.map((s) => (
+          <li class="symptom paint-in" id={`simptom-${symptoms.indexOf(s) + 1}`}>
+            <div class="symptom-text">
+              <h3>{s.label}</h3>
+              <p>{s.detail}</p>
+            </div>
+            <ul class="symptom-routes" aria-label={`Servicii pentru: ${s.label}`}>
+              {s.services.map((slug) => (
+                <li>
+                  <a href={`/servicii/${slug}`}>
+                    <span class="route-bay sign">{serviceBySlug[slug].bay}</span>
+                    <span>{serviceBySlug[slug].name}</span>
+                    <Icon name="arrow" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+      <p class="symptom-unsure">
+        Nu ești sigur? Descrie-ne problema la telefon: <a href={contact.phoneHref}>{contact.phoneDisplay}</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Boxele atelierului -->
+  <section class="section bays" aria-labelledby="boxe-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="boxe-title">Boxele atelierului</h2>
+        <p class="lede measure">Șase servicii pentru direcție, geometrie și sistemele de asistență, de la autoturisme la camioane.</p>
+      </div>
+      <ul class="bay-grid">
+        {services.map((s) => (
+          <li class="bay">
+            <a class="bay-link bay-frame" href={`/servicii/${s.slug}`}>
+              <span class="bay-number sign" aria-hidden="true">{s.bay}</span>
+              <Image class="bay-photo" src={s.photo} alt="" widths={[400, 640]} sizes="(max-width: 700px) 100vw, 33vw" />
+              <span class="bay-text">
+                <span class="bay-name">{s.name}</span>
+                <span class="bay-short">{s.short}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Cum lucrăm -->
+  <section class="section flow" aria-labelledby="flux-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="flux-title">Cum ajunge o casetă înapoi pe mașină</h2>
+        <p class="lede measure">Același traseu prin atelier, de fiecare dată. Testul de pe banc vine înainte de predare.</p>
+      </div>
+      <ol class="flow-line">
+        {workflow.map((w, i) => (
+          <li class="station paint-in" style={`--i:${i}`}>
+            <Image class="station-photo" src={w.photo} alt={w.alt} widths={[400, 640]} sizes="(max-width: 860px) 100vw, 25vw" />
+            <h3><span class="station-dot" aria-hidden="true"></span>{w.title}</h3>
+            <p>{w.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Din stoc -->
+  <section class="section stock" aria-labelledby="stoc-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <div class="stock-head">
+        <div>
+          <h2 id="stoc-title">Casete recondiționate, din stoc</h2>
+          <p class="lede measure">
+            Nu rămâi cu mașina blocată în service. Montăm o casetă recondiționată și o primim pe cea veche la schimb.
+          </p>
+        </div>
+        <ul class="stock-terms">
+          <li><Icon name="check" />Garanție 12 luni</li>
+          <li><Icon name="swap" />Piesa veche la schimb</li>
+          <li><Icon name="truck" />Livrare în toată țara</li>
+          <li><Icon name="check" />Prețul include TVA</li>
+        </ul>
+      </div>
+      <div class="stock-grid">
+        {featured.map((p) => <ProductUnit product={p} />)}
+      </div>
+      <a class="btn btn--ghost stock-more" href="/magazin">
+        Vezi toate cele {products.length} de casete <Icon name="arrow" />
+      </a>
+    </div>
+  </section>
+
+  <!-- Oamenii -->
+  <section class="section people" aria-labelledby="echipa-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap people-head">
+      <h2 id="echipa-title">Oamenii din atelier</h2>
+      <p class="lede measure">
+        {team.length} oameni, de la mecanici și electroniști la consilierii care îți răspund la telefon.
+      </p>
+    </div>
+    <ul class="crew" tabindex="0" aria-label="Echipa DIRECTPRO, derulează orizontal">
+      {team.map((m) => (
+        <li class="crew-member">
+          <Image src={m.photo} alt={`${m.name}, ${m.role}`} widths={[240, 400]} sizes="220px" />
+          <p class="crew-name">{m.name}</p>
+          <p class="crew-role">{m.role}</p>
+        </li>
+      ))}
+    </ul>
+    <div class="wrap">
+      <a class="people-more" href="/despre">Despre DIRECTPRO <Icon name="arrow" size={18} /></a>
+    </div>
+  </section>
+
+  <!-- Ce spun clienții -->
+  <section class="section voices" aria-labelledby="voci-title">
+    <span class="stop" data-stop aria-hidden="true"></span>
+    <div class="wrap">
+      <h2 id="voci-title">Ce spun clienții</h2>
+      <div class="voice-grid">
+        {testimonials.map((t, i) => (
+          <figure class:list={['voice', { 'voice--lead': i === 0 }]}>
+            <blockquote><p>„{t.quote}”</p></blockquote>
+            <figcaption>{t.name}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Recepția: capătul liniei -->
+  <section class="reception" aria-labelledby="receptie-title">
+    <span class="stop reception-stop" data-stop aria-hidden="true"></span>
+    <div class="wrap reception-inner">
+      <div class="reception-copy">
+        <h2 id="receptie-title" class="visually-hidden">Recepție</h2>
+        <a class="reception-phone" href={contact.phoneHref} aria-label={`Sună la recepție: ${contact.phoneDisplay}`}>{contact.phoneDisplay}</a>
+        <p class="reception-meta">{contact.hours}</p>
+        <div class="hero-actions">
+          <a class="btn btn--call" href={contact.phoneHref}><Icon name="phone" />Sună acum</a>
+          <a class="btn btn--ghost reception-ghost" href={contact.whatsappHref} rel="noopener" target="_blank"><Icon name="chat" />WhatsApp</a>
+        </div>
+        <address>
+          <Icon name="pin" size={18} />
+          <span>{contact.street}, {contact.building}, {contact.city}</span>
+        </address>
+        <p class="reception-links">
+          <a href={contact.mapsHref} rel="noopener" target="_blank">Deschide în Google Maps</a>
+          <a href={contact.wazeHref} rel="noopener" target="_blank">Navighează cu Waze</a>
+        </p>
+      </div>
+      <Image class="reception-photo" src={birou} alt="Colegă DIRECTPRO la birou, lucrând la laptop" widths={[400, 600]} sizes="(max-width: 860px) 100vw, 30vw" />
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    padding-top: clamp(1.5rem, 3.5vw, 3.25rem);
+  }
+
+  .hero-symptoms {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .hero-symptoms p {
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .hero-symptoms ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hero-symptoms a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.9rem;
+    border: 2px solid var(--lane);
+    border-radius: var(--radius);
+    color: var(--ink);
+    font-weight: 650;
+    font-size: var(--step--1);
+    text-decoration: none;
+    transition: background-color 180ms var(--ease-out);
+  }
+
+  .hero-symptoms a:hover {
+    background: var(--lane);
+  }
+
+  .hero-stop {
+    top: clamp(2.6rem, 5.6vw, 5.2rem);
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-areas: 'title title' 'copy photo';
+    gap: clamp(1.5rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 4rem);
+    align-items: end;
+    padding-left: calc(var(--gutter) + var(--lane-x) + var(--lane-w) + max(0px, (100vw - var(--max)) / 2));
+  }
+
+  .hero h1 {
+    grid-area: title;
+    font-size: var(--step-5);
+    font-stretch: 116%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    max-width: 17ch;
+    padding-right: var(--gutter);
+  }
+
+  .hero-copy {
+    grid-area: copy;
+  }
+
+  .hero-photo {
+    grid-area: photo;
+  }
+
+  .hero .lede {
+    max-width: 40ch;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .hero-copy .hero-actions .btn--call {
+    font-size: var(--step-0);
+  }
+
+  .hero-hours {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .hero-copy {
+    padding-bottom: clamp(1rem, 2vw, 2rem);
+  }
+
+  .hero-photo {
+    margin: 0;
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+
+  .hero-photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 30% 60%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-photo :global(img) {
+      animation: hall-open 1400ms var(--ease-out) both;
+    }
+
+    .hero h1 {
+      animation: rise 900ms var(--ease-out) both;
+    }
+  }
+
+  @keyframes hall-open {
+    from {
+      clip-path: inset(0 0 0 100%);
+      transform: scale(1.06);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
+  /* Banda de pe podea: linia galbenă cotește spre dreapta, sub fotografie. */
+  .floor-facts {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 1.5rem var(--gutter) 1.6rem calc(var(--gutter) + var(--lane-x) + var(--lane-w) + max(0px, (100vw - var(--max)) / 2));
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem 2rem;
+    background: var(--ink);
+    color: #e2e8f0;
+    border-top: var(--lane-w) solid var(--lane);
+  }
+
+  .floor-facts li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    line-height: 1.35;
+  }
+
+  .floor-facts :global(svg) {
+    flex: none;
+    color: var(--lane);
+    margin-top: 0.1em;
+  }
+
+  .floor-facts strong {
+    display: block;
+    color: #fff;
+    font-stretch: 112%;
+    font-weight: 750;
+  }
+
+  /* ---------- Section heads ---------- */
+  .section-head {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .section h2 {
+    font-size: var(--step-4);
+  }
+
+  .stop {
+    top: clamp(4.4rem, 3.4rem + 5vw, 8.4rem);
+  }
+
+  /* ---------- Symptoms ---------- */
+  .symptom-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .symptom {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 1rem 3rem;
+    padding: clamp(1.4rem, 2.5vw, 2.1rem) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .symptom h3 {
+    font-size: var(--step-2);
+    margin-bottom: 0.4rem;
+  }
+
+  .symptom-text p {
+    color: var(--ink-soft);
+    max-width: 48ch;
+  }
+
+  .symptom-routes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+    align-content: center;
+  }
+
+  .symptom-routes a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 52px;
+    padding: 0.4rem 1rem 0.4rem 0.4rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 650;
+    text-decoration: none;
+    transition: border-color 200ms var(--ease-out), background-color 200ms var(--ease-out);
+  }
+
+  .route-bay {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    background: var(--floor-deep);
+    font-size: 0.95rem;
+    transition: background-color 200ms var(--ease-out);
+  }
+
+  .symptom-routes a :global(svg) {
+    transition: transform 240ms var(--ease-out);
+  }
+
+  .symptom-routes a:hover {
+    border-color: var(--ink);
+  }
+
+  .symptom-routes a:hover .route-bay {
+    background: var(--lane);
+  }
+
+  .symptom-routes a:hover :global(svg) {
+    transform: translateX(4px);
+  }
+
+  .symptom-unsure {
+    margin-top: 1.75rem;
+    font-weight: 600;
+  }
+
+  /* ---------- Bays ---------- */
+  .bay-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .bay-link {
+    --c: var(--ink);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto;
+    height: 100%;
+    padding: 14px;
+    color: var(--ink);
+    text-decoration: none;
+    transition: --c 200ms;
+  }
+
+  .bay-link:hover,
+  .bay-link:focus-visible {
+    --c: var(--lane-deep);
+  }
+
+  .bay-number {
+    position: absolute;
+    z-index: 1;
+    top: 26px;
+    left: 26px;
+    padding: 0.35rem 0.55rem;
+    background: var(--lane);
+    color: var(--ink);
+    font-size: 1.05rem;
+  }
+
+  .bay-link :global(.bay-photo) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: saturate(0.92);
+    transition: filter 300ms var(--ease-out);
+  }
+
+  .bay-link:hover :global(.bay-photo) {
+    filter: saturate(1.08);
+  }
+
+  .bay-text {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem 0.35rem 0.4rem;
+  }
+
+  .bay-name {
+    font-size: var(--step-1);
+    font-stretch: 112%;
+    font-weight: 760;
+    line-height: 1.15;
+  }
+
+  .bay-short {
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Flow ---------- */
+  .flow {
+    background: var(--paper);
+  }
+
+  .flow-line {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 1.75rem);
+    position: relative;
+  }
+
+  .station h3 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: var(--step-1);
+    margin: 1.4rem 0 0.4rem;
+    padding-top: 1.1rem;
+    border-top: var(--lane-w) solid var(--lane);
+  }
+
+  .station-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--ink);
+    flex: none;
+  }
+
+  .station p {
+    color: var(--ink-soft);
+  }
+
+  .station :global(.station-photo) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .station.paint-in {
+      transition-delay: calc(var(--i) * 120ms);
+    }
+  }
+
+  /* ---------- Stock ---------- */
+  .stock-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 2rem 4rem;
+    align-items: end;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .stock-head h2 {
+    margin-bottom: 1rem;
+  }
+
+  .stock-terms {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.5rem;
+    font-weight: 650;
+  }
+
+  .stock-terms li {
+    display: flex;
+    gap: 0.55rem;
+    align-items: center;
+  }
+
+  .stock-terms :global(svg) {
+    color: var(--teal-ink);
+    flex: none;
+  }
+
+  .stock-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+
+  .stock-more {
+    margin-top: 2rem;
+  }
+
+  /* ---------- People ---------- */
+  .people-head {
+    margin-bottom: 2rem;
+  }
+
+  .people-head h2 {
+    margin-bottom: 1rem;
+  }
+
+  .crew {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem calc(var(--gutter) + var(--lane-x) + var(--lane-w) + max(0px, (100vw - var(--max)) / 2)) 1.25rem;
+    scroll-padding-inline: calc(var(--gutter) + var(--lane-x) + var(--lane-w) + max(0px, (100vw - var(--max)) / 2));
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(150px, 16vw, 210px);
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .crew-member {
+    scroll-snap-align: start;
+  }
+
+  .crew-member :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: top;
+    border-radius: var(--radius);
+    background: #12286b;
+  }
+
+  .crew-name {
+    margin-top: 0.7rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .crew-role {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .people-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    margin-top: 1rem;
+    font-weight: 650;
+  }
+
+  /* ---------- Voices ---------- */
+  .voices h2 {
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem 3rem;
+  }
+
+  .voice {
+    margin: 0;
+    padding-top: 1.25rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .voice--lead {
+    grid-row: span 2;
+  }
+
+  .voice blockquote {
+    margin: 0;
+  }
+
+  .voice p {
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  .voice--lead p {
+    font-size: var(--step-2);
+    font-stretch: 104%;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  .voice figcaption {
+    margin-top: 1rem;
+    font-weight: 700;
+  }
+
+  .voice figcaption::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 4px;
+    margin-right: 0.6rem;
+    vertical-align: middle;
+    background: var(--lane);
+  }
+
+  /* ---------- Reception ---------- */
+  .reception {
+    position: relative;
+    background: var(--navy);
+    color: #fff;
+    padding-block: clamp(4rem, 8vw, 7rem);
+    overflow: hidden;
+  }
+
+  .reception-stop {
+    top: clamp(4.6rem, 8.6vw, 7.6rem);
+  }
+
+  .reception-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .reception-phone {
+    display: inline-block;
+    color: #fff;
+    font-size: clamp(2.3rem, 1rem + 4.2vw, 4.5rem);
+    font-stretch: 120%;
+    white-space: nowrap;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .reception-phone:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--lane);
+    text-decoration-thickness: 6px;
+  }
+
+  .reception-meta {
+    margin-top: 0.8rem;
+    font-weight: 600;
+    color: #d3e1f2;
+  }
+
+  .reception-ghost {
+    --btn-fg: #fff;
+    border-color: #fff;
+  }
+
+  .reception-ghost:hover {
+    --btn-bg: #fff;
+    --btn-fg: var(--navy);
+  }
+
+  .reception address {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    margin-top: 2rem;
+    font-style: normal;
+  }
+
+  .reception address :global(svg) {
+    flex: none;
+    margin-top: 0.25em;
+    color: var(--lane);
+  }
+
+  .reception-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .reception-links a {
+    color: #fff;
+    font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .reception :global(.reception-photo) {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px) {
+    .stock-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .floor-facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 860px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'photo' 'title' 'copy';
+      padding-right: calc(var(--gutter));
+    }
+
+    .hero-photo {
+      border-radius: var(--radius);
+      aspect-ratio: 16 / 9;
+    }
+
+    .hero-stop {
+      display: none;
+    }
+
+    .symptom {
+      grid-template-columns: 1fr;
+    }
+
+    .bay-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .flow-line {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stock-head,
+    .voice-grid,
+    .reception-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .voice--lead {
+      grid-row: auto;
+    }
+
+    .reception :global(.reception-photo) {
+      aspect-ratio: 4 / 3;
+      max-height: 320px;
+      object-position: top;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .bay-grid,
+    .floor-facts {
+      grid-template-columns: 1fr;
+    }
+
+    .flow-line {
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .station :global(.station-photo) {
+      aspect-ratio: 1;
+    }
+
+    .stock-terms {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-actions .btn {
+      flex: 1 1 100%;
+    }
+  }
+
+  /* ---------- Șablon 2: hero bleumarin, panouri rotunjite ---------- */
+  .hero {
+    background:
+      radial-gradient(120% 90% at 85% 10%, rgb(37 99 184 / 0.35), transparent 60%),
+      var(--navy);
+    color: #fff;
+  }
+
+  .hero h1 {
+    color: #fff;
+  }
+
+  .hero .lede,
+  .hero-hours {
+    color: #c6d3e4;
+  }
+
+  .hero .btn--ghost {
+    --btn-fg: #fff;
+    border-color: rgb(255 255 255 / 0.7);
+  }
+
+  .hero .btn--ghost:hover {
+    --btn-bg: #fff;
+    --btn-fg: var(--navy);
+  }
+
+  .hero-symptoms {
+    border-top-color: rgb(255 255 255 / 0.18);
+  }
+
+  .hero-symptoms a {
+    color: #fff;
+    border-color: rgb(245 184 0 / 0.85);
+  }
+
+  .hero-symptoms a:hover {
+    color: var(--navy);
+  }
+
+  .hero-photo {
+    border-radius: 18px 0 0 0;
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.6);
+  }
+
+  .floor-facts {
+    background: var(--navy-2);
+    border-top: 4px solid var(--lane);
+  }
+
+  .bay-link {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition:
+      transform 300ms var(--ease-out),
+      box-shadow 300ms var(--ease-out),
+      border-color 300ms var(--ease-out);
+  }
+
+  .bay-link:hover,
+  .bay-link:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    border-color: var(--teal);
+  }
+
+  .bay-link :global(.bay-photo) {
+    border-radius: calc(var(--radius) - 4px);
+  }
+
+  .route-bay,
+  .bay-number {
+    border-radius: 6px;
+  }
+
+  .flow {
+    background: linear-gradient(180deg, var(--paper), var(--floor));
+  }
+
+  .station h3 {
+    border-top-width: 4px;
+    border-top-color: var(--teal);
+  }
+
+  .station-dot {
+    border-radius: 50%;
+    background: var(--lane);
+  }
+
+  .voice {
+    border-top-color: var(--teal);
+  }
+
+  @media (max-width: 860px) {
+    .hero-photo {
+      border-radius: var(--radius);
+    }
+  }
+</style>
